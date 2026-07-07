@@ -1,0 +1,12 @@
+services:
+  frontend:
+    restart: unless-stopped
+    image: ghcr.io/tu-org/climatologia-frontend:${IMAGE_TAG}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=piia-platform"
+      - "traefik.http.routers.climatologia-front.rule=Host(`${APP_HOST}`) || Host(`www.${APP_HOST}`)"
+      - "traefik.http.routers.climatologia-front.entrypoints=websecure"
+      - "traefik.http.routers.climatologia-front.tls=true"
+      - "traefik.http.routers.climatologia-front.tls.certresolver=le"
+      - "traefik.http.services.climatologia-front.loadbalancer.server.port=5173"
