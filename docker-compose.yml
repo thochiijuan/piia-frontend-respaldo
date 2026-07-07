@@ -1,27 +1,10 @@
 services:
   frontend:
-    restart: unless-stopped
-    labels:
-      - "service_group=frontend"
-      - "service_type=frontend-development"
-      - "traefik.enable=true"
-      - "traefik.docker.network=piia-platform"
-      - "traefik.http.routers.climatologia-back.rule=(Host(`dorito-develop.com`) || Host(`www.dorito-develop.com`))"
-      - "traefik.http.routers.climatologia-back.entrypoints=websecure"
-      - "traefik.http.routers.climatologia-back.tls=true"
-      - "traefik.http.routers.climatologia-back.priority=100"
-      - "traefik.http.services.climatologia-back.loadbalancer.server.port=5173"
-      - "traefik.http.routers.test.tls.certresolver=le"
     build:
       context: ./react-javascript/
       dockerfile: Dockerfile
-    volumes:
-      - ./react-javascript/develop/:/app
-    expose: [5173]
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    # command: tail -f /dev/null
-    command: npm run dev
+    expose:
+      - "5173"
     networks:
       - piia-platform
 
