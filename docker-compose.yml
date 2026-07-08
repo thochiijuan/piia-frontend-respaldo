@@ -1,7 +1,5 @@
 services:
   frontend:
-    volumes:
-    - ./react-javascript/develop/:/app
     build:
       context: ./react-javascript/
       dockerfile: Dockerfile

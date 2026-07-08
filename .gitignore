@@ -1,3 +1,43 @@
+# Variables de entorno
 .env
-react-javascript/develop/package-lock.json
-react-javascript/develop/node_modules/*
+.env.*
+!.env.example
+
+react-javascript/develop/.env
+react-javascript/develop/.env.*
+!react-javascript/develop/.env.example
+
+# Node / dependencias
+react-javascript/develop/node_modules/
+
+# Next.js
+react-javascript/develop/.next/
+react-javascript/develop/out/
+
+# Build / dist
+react-javascript/develop/dist/
+react-javascript/develop/build/
+
+# Logs
+react-javascript/develop/npm-debug.log*
+react-javascript/develop/yarn-debug.log*
+react-javascript/develop/yarn-error.log*
+react-javascript/develop/pnpm-debug.log*
+
+# Cache
+react-javascript/develop/.cache/
+react-javascript/develop/.parcel-cache/
+react-javascript/develop/.turbo/
+
+# Sistema operativo
+react-javascript/develop/.DS_Store
+react-javascript/develop/Thumbs.db
+
+# IDEs
+react-javascript/develop/.vscode/
+react-javascript/develop/.idea/
+
+# Docker / temporales
+react-javascript/develop/*.pid
+react-javascript/develop/*.seed
+react-javascript/develop/*.pid.lock
