@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import Image from "next/image";
 import FilterPanel from "../components/FilterPanel";
 import MapView from "../components/MapView";
 
@@ -26,8 +27,17 @@ export default function HomePage() {
         <nav className="flex-1 px-4 py-6">
 
           <button className="w-full bg-[#4F46E5] hover:bg-[#4338CA] transition rounded-[8px] px-4 py-3 flex items-center gap-3 text-sm">
-            🏠 Inicio
-          </button>
+
+          <Image
+            src="https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Inicio.png"
+            alt="Inicio"
+            width={20}
+            height={20}
+          />
+
+          <span>Inicio</span>
+
+        </button>
 
         </nav>
 

@@ -1,11 +1,20 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "dorito-develop.com",
     "www.dorito-develop.com",
   ],
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "s3.dorito-develop.com",
+        pathname: "/corporate-brand-assets/**",
+      },
+    ],
+  },
 };
 
-module.exports = nextConfig;
 export default nextConfig;

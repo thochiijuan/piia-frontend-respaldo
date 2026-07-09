@@ -11,6 +11,44 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+const logoVersion = "20260709";
+
+const loginLogos = {
+  omicas:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/omicas_logo_transparente_1.png",
+  mariaCano:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/maria_cano_logo.png",
+  sgr:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/SGR.png",
+  clinicaCosta:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/clinica_de_la_costa.png",
+  minciencias:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/minciencias_logo.png",
+  universidadCauca:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/universidad_del_cauca_logo.jpg",
+  hospitalUniversitario:
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/hospital_universitario_logo.png",
+};
+
+const bottomLoginLogos = [
+  {
+    src: loginLogos.mariaCano,
+    alt: "Maria Cano",
+  },
+  {
+    src: loginLogos.clinicaCosta,
+    alt: "Clinica de la Costa",
+  },
+  {
+    src: loginLogos.universidadCauca,
+    alt: "Universidad del Cauca",
+  },
+  {
+    src: loginLogos.hospitalUniversitario,
+    alt: "Hospital Universitario",
+  },
+];
+
 export default function LoginPage() {
     const router = useRouter();
 
@@ -87,11 +125,12 @@ export default function LoginPage() {
       <div className="absolute top-12 left-12 z-10">
 
         <Image
-          src="/LOGO_OMICAS.png"
+          src={`${loginLogos.omicas}?v=${logoVersion}`}
           alt="OMICAS"
-          width={120}
+          width={160}
           height={120}
-          className="object-contain"
+          unoptimized
+          className="h-[120px] w-auto object-contain"
         />
 
       </div>
@@ -99,19 +138,21 @@ export default function LoginPage() {
       <div className="absolute top-10 right-14 flex items-center gap-10 z-10">
 
         <Image
-          src="/datos-imporantes-dengue.png"
-          alt="Ciencias"
-          width={120}
-          height={120}
-          className="object-contain"
+          src={`${loginLogos.minciencias}?v=${logoVersion}`}
+          alt="MinCiencias"
+          width={160}
+          height={80}
+          unoptimized
+          className="h-[72px] w-auto object-contain"
         />
 
         <Image
-          src="/sgr.png"
+          src={`${loginLogos.sgr}?v=${logoVersion}`}
           alt="SGR"
-          width={120}
-          height={120}
-          className="object-contain"
+          width={130}
+          height={80}
+          unoptimized
+          className="h-[72px] w-auto object-contain"
         />
 
       </div>
@@ -230,46 +271,17 @@ export default function LoginPage() {
 
       {/* LOGOS INFERIORES */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-8 z-10 flex-wrap justify-center px-10">
-
-        <Image
-          src="/logo1.png"
-          alt="logo"
-          width={100}
-          height={50}
-          className="object-contain opacity-90"
-        />
-
-        <Image
-          src="/logo2.png"
-          alt="logo"
-          width={100}
-          height={50}
-          className="object-contain opacity-90"
-        />
-
-        <Image
-          src="/logo3.png"
-          alt="logo"
-          width={100}
-          height={50}
-          className="object-contain opacity-90"
-        />
-
-        <Image
-          src="/logo4.png"
-          alt="logo"
-          width={120}
-          height={50}
-          className="object-contain opacity-90"
-        />
-
-        <Image
-          src="/logo5.png"
-          alt="logo"
-          width={120}
-          height={50}
-          className="object-contain opacity-90"
-        />
+        {bottomLoginLogos.map((logo) => (
+          <Image
+            key={logo.src}
+            src={`${logo.src}?v=${logoVersion}`}
+            alt={logo.alt}
+            width={150}
+            height={70}
+            unoptimized
+            className="h-[60px] w-auto object-contain opacity-90"
+          />
+        ))}
 
       </div>
 
