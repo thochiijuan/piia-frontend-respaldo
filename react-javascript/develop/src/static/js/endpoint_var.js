@@ -1,23 +1,35 @@
-const s3_enpoint = `https://s3.${process.env.APP_HOST}/`
-const repository_endpoint = `https://api.${process.env.APP_HOST}/repository`
-const georeferencer_endpoint = `https://s3.${process.env.APP_HOST}/georeferencer`
+const appHost = process.env.NEXT_PUBLIC_APP_HOST;
 
-const logos = {
+const s3_endpoint = `https://s3.${appHost}`;
+const repository_endpoint = `https://api.${appHost}/repository`;
+const georeferencer_endpoint = `https://api.${appHost}/georeferencer`;
+
+export const logos = {
     omicas:
-        `s3_enpoint}/corporate-brand-assets/public/omicas_logo_transparente_1.png`,
-    omicas_2:
-        `${s3_enpoint}/corporate-brand-assets/public/omicas_logo_transparente_1.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/omicas_logo_transparente_1.png`,
     mariaCano:
-        `${s3_enpoint}/corporate-brand-assets/public/maria_cano_logo.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/maria_cano_logo.png`,
     sgr:
-        `${s3_enpoint}/corporate-brand-assets/public/SGR.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/SGR.png`,
     clinicaCosta:
-        `${s3_enpoint}/corporate-brand-assets/public/clinica_de_la_costa.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/clinica_de_la_costa.png`,
     minciencias:
-        `${s3_enpoint}/corporate-brand-assets/public/minciencias_logo.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/minciencias_logo.png`,
     universidadCauca:
-        `${s3_enpoint}/corporate-brand-assets/public/universidad_del_cauca_logo.jpg`,
+        `${s3_endpoint}/corporate-brand-assets/public/universidad_del_cauca_logo.jpg`,
     hospitalUniversitario:
-        `${s3_enpoint}/corporate-brand-assets/public/hospital_universitario_logo.png`,
+        `${s3_endpoint}/corporate-brand-assets/public/hospital_universitario_logo.png`,
+    omicasLogoBlanco:
+        `${s3_endpoint}/corporate-brand-assets/public/omicas_logo_blanco.png`,
 };
-export default logos
+
+export const iconos = {
+    inicio:
+        `${s3_endpoint}/corporate-brand-assets/public/iconos/Inicio.png?v=20260709`,
+};
+
+export const endpoints = {
+    s3_endpoint,
+    repository_endpoint,
+    georeferencer_endpoint,
+};

@@ -2,29 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import logos from "../../static/js/endpoint_var";
+import { logos } from "../../static/js/endpoint_var";
 import { Mail, Lock, EyeOff, AlertCircle, } from "lucide-react";
-
-const logoVersion = "20260709";
-
-const bottomLoginLogos = [
-  {
-    src: logos.mariaCano,
-    alt: "Maria Cano",
-  },
-  {
-    src: logos.clinicaCosta,
-    alt: "Clinica de la Costa",
-  },
-  {
-    src: logos.universidadCauca,
-    alt: "Universidad del Cauca",
-  },
-  {
-    src: logos.hospitalUniversitario,
-    alt: "Hospital Universitario",
-  }
-];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -94,6 +73,26 @@ export default function LoginPage() {
 
   };
 
+  const bottomLoginLogos = [
+    {
+      src: logos.mariaCano,
+      alt: "Maria Cano",
+    },
+    {
+      src: logos.clinicaCosta,
+      alt: "Clinica de la Costa",
+    },
+    {
+      src: logos.universidadCauca,
+      alt: "Universidad del Cauca",
+    },
+    {
+      src: logos.hospitalUniversitario,
+      alt: "Hospital Universitario",
+    }
+  ];
+
+
   return (
     <main className="relative w-full h-screen overflow-hidden bg-white">
 
@@ -119,7 +118,7 @@ export default function LoginPage() {
       <div className="absolute top-12 left-12 z-10">
 
         <Image
-          src={`${logos.omicas_2}`}
+          src={`${logos.omicas}`}
           alt="OMICAS"
           width={160}
           height={120}
@@ -132,7 +131,7 @@ export default function LoginPage() {
       <div className="absolute top-10 right-14 flex items-center gap-10 z-10">
 
         <Image
-          src={`${logos.minciencias}?v=${logoVersion}`}
+          src={`${logos.minciencias}`}
           alt="MinCiencias"
           width={160}
           height={80}
@@ -141,7 +140,7 @@ export default function LoginPage() {
         />
 
         <Image
-          src={`${logos.sgr}?v=${logoVersion}`}
+          src={`${logos.sgr}`}
           alt="SGR"
           width={130}
           height={80}
@@ -268,7 +267,7 @@ export default function LoginPage() {
         {bottomLoginLogos.map((logo) => (
           <Image
             key={logo.src}
-            src={`${logo.src}?v=${logoVersion}`}
+            src={`${logo.src}`}
             alt={logo.alt}
             width={150}
             height={70}

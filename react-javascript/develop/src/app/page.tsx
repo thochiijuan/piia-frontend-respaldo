@@ -1,12 +1,10 @@
 import Link from "next/link";
-
+import { logos, iconos } from "../static/js/endpoint_var"
 import Image from "next/image";
 
 import FilterPanel from "./components/FilterPanel";
 import MapView from "./components/MapView";
 
-const inicioIconUrl =
-  "https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Inicio.png?v=20260709";
 
 export default function HomePage() {
   return (
@@ -20,7 +18,7 @@ export default function HomePage() {
         <div className="flex flex-col items-center pt-6 pb-6 border-b border-white/10">
 
           <img
-            src="/logo_omica.png"
+            src={logos.omicasLogoBlanco}
             alt="Logo OMICAS"
             className="w-28 h-auto object-contain"
           />
@@ -32,7 +30,7 @@ export default function HomePage() {
 
           <button className="w-full bg-[#4F46E5] hover:bg-[#4338CA] transition rounded-[8px] px-4 py-3 flex items-center gap-3 text-sm">
             <Image
-              src={inicioIconUrl}
+              src={iconos.inicio}
               alt="Inicio"
               width={22}
               height={22}
