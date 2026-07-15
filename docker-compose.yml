@@ -3,6 +3,8 @@ services:
     build:
       context: ./react-javascript/
       dockerfile: Dockerfile
+    environment:
+      - APP_HOST=${APP_HOST}
     expose:
       - "5173"
     networks:

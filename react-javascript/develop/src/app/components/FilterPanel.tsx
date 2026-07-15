@@ -8,7 +8,7 @@ interface FilterPanelProps {
 }
 
 export default function FilterPanel({
-  isAuthenticated = false,
+  isAuthenticated = true,
 }: FilterPanelProps) {
 
   const [searchDepartamento, setSearchDepartamento] = useState("");
@@ -59,11 +59,10 @@ export default function FilterPanel({
                       setSelectedDepartamento(dep);
                       setSearchDepartamento(dep);
                     }}
-                    className={`w-full text-left px-4 py-3 text-sm transition hover:bg-blue-50 ${
-                      selectedDepartamento === dep
+                    className={`w-full text-left px-4 py-3 text-sm transition hover:bg-blue-50 ${selectedDepartamento === dep
                         ? "bg-blue-100 text-blue-700 font-medium"
                         : "text-slate-700"
-                    }`}
+                      }`}
                   >
                     {dep}
                   </button>

@@ -7,6 +7,9 @@ RUN export NVM_DIR="$HOME/.nvm" && \
 
 COPY develop/* /app/
 
+ARG APP_HOST
+ENV APP_HOST=${APP_HOST}
+
 WORKDIR /app
 RUN ls
 RUN rm -rf node_modules

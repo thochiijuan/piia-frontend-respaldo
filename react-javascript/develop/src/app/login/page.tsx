@@ -1,105 +1,99 @@
 "use client";
-
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import {
-  Mail,
-  Lock,
-  EyeOff,
-  AlertCircle,
-} from "lucide-react";
+import logos from "../../static/js/endpoint_var";
+import { Mail, Lock, EyeOff, AlertCircle, } from "lucide-react";
 
 const logoVersion = "20260709";
 
-const loginLogos = {
-  omicas:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/omicas_logo_transparente_1.png",
-  mariaCano:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/maria_cano_logo.png",
-  sgr:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/SGR.png",
-  clinicaCosta:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/clinica_de_la_costa.png",
-  minciencias:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/minciencias_logo.png",
-  universidadCauca:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/universidad_del_cauca_logo.jpg",
-  hospitalUniversitario:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/hospital_universitario_logo.png",
-};
-
 const bottomLoginLogos = [
   {
-    src: loginLogos.mariaCano,
+    src: logos.mariaCano,
     alt: "Maria Cano",
   },
   {
-    src: loginLogos.clinicaCosta,
+    src: logos.clinicaCosta,
     alt: "Clinica de la Costa",
   },
   {
-    src: loginLogos.universidadCauca,
+    src: logos.universidadCauca,
     alt: "Universidad del Cauca",
   },
   {
-    src: loginLogos.hospitalUniversitario,
+    src: logos.hospitalUniversitario,
     alt: "Hospital Universitario",
-  },
+  }
 ];
 
 export default function LoginPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const [user, setUser] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const handleLogin = async () => {
+  const handleLogin = async () => {
+    try {
+      setError("");
+      console.log("OMICAS URL:", logos.omicas);
+      const normalizedUser = user.trim().toLowerCase();
+      const normalizedPassword = password.trim();
 
-  try {
+      // Acceso demo temporal
+      if (
+        normalizedUser === "demo@demo.com" &&
+        normalizedPassword === "demo123"
+      ) {
+        const demoUser = {
+          id: "demo",
+          name: "Usuario Demo",
+          email: "demo@demo.com",
+          role: "demo",
+          isDemo: true,
+        };
 
-    setError("");
+        localStorage.setItem("user", JSON.stringify(demoUser));
 
-    const response = await fetch(
-      "/api/auth/login",
-      {
+        // Para middleware o validaciones que revisen cookies
+        document.cookie =
+          "auth_token=demo-token; path=/; max-age=86400; SameSite=Lax";
+
+        document.cookie =
+          "user_role=demo; path=/; max-age=86400; SameSite=Lax";
+
+        router.replace("/dashboard");
+        return;
+      }
+
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: user,
-          password,
+          email: normalizedUser,
+          password: normalizedPassword,
         }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setError(data.message || "Credenciales incorrectas");
+        return;
       }
-    );
 
-    const data = await response.json();
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-    if (!data.success) {
-
-      setError(data.message);
-
-      return;
+      router.replace("/dashboard");
+    } catch (error) {
+      console.error("Error de login:", error);
+      setError("Error al iniciar sesión");
     }
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
+  };
 
-    router.push("/dashboard");
-
-  } catch (error) {
-
-    console.error(error);
-
-    setError("Error al iniciar sesión");
-
-  }
-};
   return (
     <main className="relative w-full h-screen overflow-hidden bg-white">
 
@@ -125,7 +119,7 @@ export default function LoginPage() {
       <div className="absolute top-12 left-12 z-10">
 
         <Image
-          src={`${loginLogos.omicas}?v=${logoVersion}`}
+          src={`${logos.omicas_2}`}
           alt="OMICAS"
           width={160}
           height={120}
@@ -138,7 +132,7 @@ export default function LoginPage() {
       <div className="absolute top-10 right-14 flex items-center gap-10 z-10">
 
         <Image
-          src={`${loginLogos.minciencias}?v=${logoVersion}`}
+          src={`${logos.minciencias}?v=${logoVersion}`}
           alt="MinCiencias"
           width={160}
           height={80}
@@ -147,7 +141,7 @@ export default function LoginPage() {
         />
 
         <Image
-          src={`${loginLogos.sgr}?v=${logoVersion}`}
+          src={`${logos.sgr}?v=${logoVersion}`}
           alt="SGR"
           width={130}
           height={80}
@@ -162,35 +156,35 @@ export default function LoginPage() {
 
         <div className="w-[430px] bg-white/90 backdrop-blur-sm rounded-[28px] shadow-xl px-8 py-10 border border-white/50">
 
-        {error && (
+          {error && (
 
             <div className="flex flex-col items-center text-center mb-5 -mt-2">
 
-                {/* ICONO */}
-                <div className="w-10 h-10 rounded-full bg-[#EEF4FB] flex items-center justify-center mb-2">
+              {/* ICONO */}
+              <div className="w-10 h-10 rounded-full bg-[#EEF4FB] flex items-center justify-center mb-2">
 
                 <AlertCircle
-                    size={18}
-                    strokeWidth={2.5}
-                    className="text-[#2F80ED]"
+                  size={18}
+                  strokeWidth={2.5}
+                  className="text-[#2F80ED]"
                 />
 
-                </div>
+              </div>
 
-                {/* TITULO */}
-                <h3 className="text-[#2F80ED] font-semibold text-[15px] mb-1">
-                  {error}
-                </h3>
+              {/* TITULO */}
+              <h3 className="text-[#2F80ED] font-semibold text-[15px] mb-1">
+                {error}
+              </h3>
 
-                {/* MENSAJE */}
-                <p className="text-[#6B7280] text-[13px] leading-[20px] max-w-[320px]">
+              {/* MENSAJE */}
+              <p className="text-[#6B7280] text-[13px] leading-[20px] max-w-[320px]">
                 La contraseña que ingresaste no coincide con nuestros
                 registros. Por favor, inténtalo de nuevo.
-                </p>
+              </p>
 
             </div>
 
-            )}
+          )}
 
           {/* USER */}
           <div className="mb-6">
@@ -208,8 +202,8 @@ export default function LoginPage() {
                 placeholder="Correo electrónico"
                 value={user}
                 onChange={(e) => {
-                setUser(e.target.value);
-                setError("");
+                  setUser(e.target.value);
+                  setError("");
                 }}
                 className="flex-1 ml-3 outline-none text-sm text-slate-700 bg-transparent"
               />
@@ -251,10 +245,10 @@ export default function LoginPage() {
           <div className="flex justify-center mt-8">
 
             <button
-                onClick={handleLogin}
-                className="bg-[#2E6EA6] hover:bg-[#245985] transition text-white font-medium rounded-full px-14 py-3 text-sm shadow-md"
-                >
-                    
+              onClick={handleLogin}
+              className="bg-[#2E6EA6] hover:bg-[#245985] transition text-white font-medium rounded-full px-14 py-3 text-sm shadow-md"
+            >
+
               Ingresar
             </button>
 

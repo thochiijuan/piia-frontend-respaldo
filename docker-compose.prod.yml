@@ -1,7 +1,8 @@
 services:
   frontend:
     restart: unless-stopped
-    image: ghcr.io/tu-org/climatologia-frontend:${IMAGE_TAG}
+    volumes:
+      - ./react-javascript/develop/:/app
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=piia-platform"
@@ -10,3 +11,5 @@ services:
       - "traefik.http.routers.climatologia-front.tls=true"
       - "traefik.http.routers.climatologia-front.tls.certresolver=le"
       - "traefik.http.services.climatologia-front.loadbalancer.server.port=5173"
+    command: sh -c "npm install --verbose && npm run dev && tail -f /dev/null"
+    # command: tail -f /dev/null
