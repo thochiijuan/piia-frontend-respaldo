@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
+    event?.preventDefault();
     try {
       setError("");
       console.log("OMICAS URL:", logos.omicas);
@@ -153,7 +154,7 @@ export default function LoginPage() {
       {/* LOGIN CARD */}
       <div className="relative z-20 flex items-center justify-center h-full">
 
-        <div className="w-[430px] bg-white/90 backdrop-blur-sm rounded-[28px] shadow-xl px-8 py-10 border border-white/50">
+        <form onSubmit={handleLogin} className="w-[430px] bg-white/90 backdrop-blur-sm rounded-[28px] shadow-xl px-8 py-10 border border-white/50">
 
           {error && (
 
@@ -224,6 +225,7 @@ export default function LoginPage() {
 
               <input
                 type="password"
+                placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="flex-1 ml-3 outline-none text-sm text-slate-700 bg-transparent"
@@ -244,10 +246,10 @@ export default function LoginPage() {
           <div className="flex justify-center mt-8">
 
             <button
+              type="submit"
               onClick={handleLogin}
               className="bg-[#2E6EA6] hover:bg-[#245985] transition text-white font-medium rounded-full px-14 py-3 text-sm shadow-md"
             >
-
               Ingresar
             </button>
 
@@ -258,7 +260,7 @@ export default function LoginPage() {
             ¿Olvidaste tu contraseña?
           </p>
 
-        </div>
+        </form>
 
       </div>
 
