@@ -13,11 +13,8 @@ export default function PerfilPage() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-
+    console.log(storedUser)
   }, []);
-
-  const firstName = user?.first_name || "";
-  const lastName = user?.last_name || "";
 
   return (
 
@@ -37,8 +34,9 @@ export default function PerfilPage() {
               {/* AVATAR */}
               <div className="flex justify-center">
 
-                <div className="w-[170px] h-[120px] rounded-full bg-[#D9DDE3]" />
-
+                <div className="w-[170px] h-[120px] rounded-full bg-[#D9DDE3]">
+                  <img src={user?.photo} />
+                </div>
               </div>
 
               {/* INFO */}
@@ -87,7 +85,7 @@ export default function PerfilPage() {
 
                   <input
                     type="text"
-                    value={firstName}
+                    value={user?.firstName || ""}
                     readOnly
                     disabled
                     className="w-full border border-slate-200 bg-slate-100 text-slate-500 rounded-[8px] px-4 py-3 cursor-not-allowed"
@@ -104,7 +102,7 @@ export default function PerfilPage() {
 
                   <input
                     type="text"
-                    value={lastName}
+                    value={user?.lastName || ""}
                     readOnly
                     disabled
                     className="w-full border border-slate-200 bg-slate-100 text-slate-500 rounded-[8px] px-4 py-3 cursor-not-allowed"

@@ -1,63 +1,218 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Select from "react-select";
+
+import {
+    getDepartamentos,
+    getMunicipiosPorDepartamento,
+} from "../../static/js/fetch_petitions_geodesic";
 
 import type { Dispatch, SetStateAction } from "react";
 import type { FilterStatus } from "./FilterState";
 
-interface Departamento {
+interface GeographicItem {
     id: number | string;
     name: string;
 }
 
-interface DepartamentoOption {
+interface SelectOption {
     value: string;
     label: string;
 }
 
 interface FilterPanelDengueComponentProps {
     statusDict: FilterStatus;
-    setStatusDict: Dispatch<SetStateAction<FilterStatus>>;
-    departamentos?: Departamento[];
+
+    setStatusDict: Dispatch<
+        SetStateAction<FilterStatus>
+    >;
+
     isAuthenticated?: boolean;
-    onApply?: () => void;
+    onApply: (
+        municipalityIds: string[]
+    ) => void;
 }
+function createOptions(
+    items: GeographicItem[],
+    defaultLabel: string
+): SelectOption[] {
+    return [
+        {
+            value: "",
+            label: defaultLabel,
+        },
+        ...items.map((item) => ({
+            value: String(item.id),
+            label: item.name,
+        })),
+    ];
+}
+
+function findSelectedOption(
+    options: SelectOption[],
+    value: string
+): SelectOption {
+    return (
+        options.find((option) => option.value === value) ??
+        options[0]
+    );
+}
+
 
 export default function FilterPanelDengueComponent({
     statusDict,
     setStatusDict,
-    departamentos = [],
-    isAuthenticated,
+    isAuthenticated = false,
     onApply,
 }: FilterPanelDengueComponentProps) {
-    console.log(isAuthenticated)
-    const departamentoOptions = useMemo<DepartamentoOption[]>(() => {
-        return [
-            {
-                value: "",
-                label: "Todos los Departamentos",
-            },
-            ...departamentos.map((departamento) => ({
-                value: String(departamento.id),
-                label: departamento.name,
-            })),
-        ];
-    }, [departamentos]);
+    const [departamentos, setDepartamentos] = useState<
+        GeographicItem[]
+    >([]);
 
-    const selectedDepartamento =
-        departamentoOptions.find(
-            (option) =>
-                option.value === String(statusDict.filterPanel.FilterPanelDengueComponent.departamento ?? "")
-        ) ?? departamentoOptions[0];
+    const [municipios, setMunicipios] = useState<
+        GeographicItem[]
+    >([]);
 
-    const handleDepartamentoChange = (
-        option: DepartamentoOption | null
+    const [loadingDepartamentos, setLoadingDepartamentos] =
+        useState(false);
+
+    const [loadingMunicipios, setLoadingMunicipios] =
+        useState(false);
+
+    const departamentoId = String(
+        statusDict.filterPanel.departamento ?? ""
+    );
+
+    const municipioId = String(
+        statusDict.filterPanel.municipio ?? ""
+    );
+
+    const updateFilterPanel = (
+        values: Partial<FilterStatus["filterPanel"]>
     ) => {
         setStatusDict((previousStatus) => ({
             ...previousStatus,
-            departamento: option?.value ?? "",
+
+            filterPanel: {
+                ...previousStatus.filterPanel,
+                ...values,
+            },
         }));
+    };
+
+    useEffect(() => {
+        const cargarDepartamentos = async () => {
+            setLoadingDepartamentos(true);
+
+            try {
+                const data = await getDepartamentos();
+
+                setDepartamentos(
+                    Array.isArray(data) ? data : []
+                );
+            } catch (error) {
+                console.error(
+                    "Error cargando departamentos:",
+                    error
+                );
+
+                setDepartamentos([]);
+            } finally {
+                setLoadingDepartamentos(false);
+            }
+        };
+
+        cargarDepartamentos();
+    }, []);
+
+    useEffect(() => {
+        if (!departamentoId) {
+            setMunicipios([]);
+            return;
+        }
+
+        const cargarMunicipios = async () => {
+            setLoadingMunicipios(true);
+
+            try {
+                const data =
+                    await getMunicipiosPorDepartamento(
+                        departamentoId
+                    );
+
+                setMunicipios(
+                    Array.isArray(data) ? data : []
+                );
+            } catch (error) {
+                console.error(
+                    "Error cargando municipios:",
+                    error
+                );
+
+                setMunicipios([]);
+            } finally {
+                setLoadingMunicipios(false);
+            }
+        };
+
+        cargarMunicipios();
+    }, [departamentoId]);
+
+    const departamentoOptions = useMemo(
+        () =>
+            createOptions(
+                departamentos,
+                "Todos los Departamentos"
+            ),
+        [departamentos]
+    );
+
+    const municipioOptions = useMemo(
+        () =>
+            createOptions(
+                municipios,
+                "Todos los Municipios"
+            ),
+        [municipios]
+    );
+
+    const selectedDepartamento = findSelectedOption(
+        departamentoOptions,
+        departamentoId
+    );
+
+    const selectedMunicipio = findSelectedOption(
+        municipioOptions,
+        municipioId
+    );
+
+    const handleDepartamentoChange = (
+        option: SelectOption | null
+    ) => {
+        setMunicipios([]);
+
+        updateFilterPanel({
+            departamento: option?.value ?? "",
+            municipio: "",
+        });
+    };
+
+    const handleMunicipioChange = (
+        option: SelectOption | null
+    ) => {
+        updateFilterPanel({
+            municipio: option?.value ?? "",
+        });
+    };
+
+    const limpiarDepartamento = () => {
+        setMunicipios([]);
+
+        updateFilterPanel({
+            departamento: "",
+            municipio: "",
+        });
     };
 
     return (
@@ -67,13 +222,14 @@ export default function FilterPanelDengueComponent({
                     Departamento
                 </label>
 
-                <Select<DepartamentoOption, false>
+                <Select<SelectOption, false>
                     instanceId="departamento-select"
                     options={departamentoOptions}
                     value={selectedDepartamento}
                     onChange={handleDepartamentoChange}
                     isSearchable
                     isClearable={false}
+                    isLoading={loadingDepartamentos}
                     placeholder="Todos los Departamentos"
                     noOptionsMessage={() =>
                         "No se encontraron departamentos"
@@ -87,21 +243,30 @@ export default function FilterPanelDengueComponent({
                     Municipio
                 </label>
 
-                <input
-                    type="text"
-                    placeholder="Municipio (Todos)"
-                    value={statusDict.filterPanel.FilterPanelDengueComponent.municipio ?? ""}
-                    onChange={(event) =>
-                        setStatusDict((previousStatus) => ({
-                            ...previousStatus,
-                            municipio: event.target.value,
-                        }))
+                <Select<SelectOption, false>
+                    instanceId="municipio-select"
+                    options={municipioOptions}
+                    value={selectedMunicipio}
+                    onChange={handleMunicipioChange}
+                    isSearchable
+                    isClearable={false}
+                    isLoading={loadingMunicipios}
+                    isDisabled={
+                        !departamentoId ||
+                        loadingMunicipios
                     }
-                    className="w-full border border-slate-300 rounded-[8px] p-3 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    placeholder={
+                        departamentoId
+                            ? "Todos los Municipios"
+                            : "Seleccione un departamento"
+                    }
+                    noOptionsMessage={() =>
+                        "No se encontraron municipios"
+                    }
+                    className="text-sm"
                 />
             </div>
 
-            {/* SOLO USUARIOS AUTENTICADOS */}
             {isAuthenticated && (
                 <>
                     <div>
@@ -111,12 +276,18 @@ export default function FilterPanelDengueComponent({
 
                         <div className="space-y-3 text-sm">
                             <label className="flex items-center gap-2">
-                                <input type="checkbox" defaultChecked />
+                                <input
+                                    type="checkbox"
+                                    defaultChecked
+                                />
                                 Dengue
                             </label>
 
                             <label className="flex items-center gap-2">
-                                <input type="checkbox" defaultChecked />
+                                <input
+                                    type="checkbox"
+                                    defaultChecked
+                                />
                                 IRA (Infección Resp.)
                             </label>
                         </div>
@@ -129,12 +300,18 @@ export default function FilterPanelDengueComponent({
 
                         <div className="space-y-3 text-sm">
                             <label className="flex items-center gap-2">
-                                <input type="checkbox" defaultChecked />
+                                <input
+                                    type="checkbox"
+                                    defaultChecked
+                                />
                                 Niveles de riesgo
                             </label>
 
                             <label className="flex items-center gap-2">
-                                <input type="checkbox" defaultChecked />
+                                <input
+                                    type="checkbox"
+                                    defaultChecked
+                                />
                                 Casos
                             </label>
                         </div>
@@ -142,25 +319,31 @@ export default function FilterPanelDengueComponent({
                 </>
             )}
 
-            {/* BOTONES */}
             <div className="space-y-4 pt-4">
                 <button
                     type="button"
-                    onClick={onApply}
+                    onClick={() =>
+                        onApply(
+                            municipios.map((municipio) =>
+                                String(municipio.id)
+                            )
+                        )
+                    }
                     className="w-full bg-[#2F80ED] hover:bg-blue-700 transition text-white rounded-[8px] py-3 text-sm"
                 >
                     Aplicar Filtros
                 </button>
-
                 <button
                     type="button"
-                    onClick={() =>
-                        setStatusDict((previousStatus) => ({
-                            ...previousStatus,
-                            departamento: "",
-                        }))
-                    }
-                    className="w-full border bg-white hover:bg-slate-100 transition rounded-[8px] py-3 text-sm text-slate-600"
+                    onClick={limpiarDepartamento}
+                    disabled={!departamentoId}
+                    className={`
+                        w-full border rounded-[8px] py-3 text-sm transition
+                        ${departamentoId
+                            ? "bg-white hover:bg-slate-100 text-slate-600"
+                            : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                        }
+                    `}
                 >
                     Limpiar Departamento
                 </button>

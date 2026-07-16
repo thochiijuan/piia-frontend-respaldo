@@ -1,14 +1,7 @@
-import FilterPanel from "../components/FilterPanel";
-import MapView from "../components/MapView";
+// src/app/dashboard/page.tsx
+
+import GeovisorWorkspace from "../components/GeovisorWorkspace";
 
 export default function DashboardPage() {
-  return (
-    <div className="flex h-full gap-4">
-
-      <FilterPanel isAuthenticated={true} />
-
-      <MapView />
-
-    </div>
-  );
+  return <GeovisorWorkspace />;
 }

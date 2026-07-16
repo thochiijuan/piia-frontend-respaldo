@@ -1,8 +1,8 @@
 export interface FilterStatus {
     filterPanel: {
+        departamento: string;
+        municipio: string;
         FilterPanelDengueComponent: {
-            departamento: string;
-            municipio: string;
             anio: string;
             semana: string;
             eventos: {
@@ -17,11 +17,11 @@ export interface FilterStatus {
     };
 }
 
-export const initialFilterStats: FilterStatus = {
+export const initialFilterStatus: FilterStatus = {
     filterPanel: {
+        departamento: "",
+        municipio: "",
         FilterPanelDengueComponent: {
-            departamento: "",
-            municipio: "",
             anio: "",
             semana: "",
             eventos: {

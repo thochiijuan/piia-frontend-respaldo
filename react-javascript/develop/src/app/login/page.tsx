@@ -30,6 +30,10 @@ export default function LoginPage() {
           name: "Usuario Demo",
           email: "demo@demo.com",
           role: "demo",
+          firstName: "Demo",
+          lastName: "User",
+          role_name: "DemoUser",
+          photo: "https://s3.dorito-develop.com/corporate-brand-assets/public/demo_user.png",
           isDemo: true,
         };
 
