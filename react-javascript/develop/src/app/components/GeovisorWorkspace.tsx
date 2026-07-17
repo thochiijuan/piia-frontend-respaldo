@@ -28,12 +28,7 @@ interface GeovisorWorkspaceProps {
 interface AppliedFilters {
     departamento: string;
     municipio: string;
-
-    /*
-     * Municipios disponibles para el departamento.
-     */
     municipalityIds: string[];
-
     applyVersion: number;
 }
 
@@ -45,6 +40,9 @@ interface GeographicItem {
 export default function GeovisorWorkspace({
     isAuthenticated = false,
 }: GeovisorWorkspaceProps) {
+    const [authenticatedFromStorage, setAuthenticatedFromStorage] =
+        useState(false);
+
     const {
         statusDict,
         setStatusDict,
@@ -66,9 +64,41 @@ export default function GeovisorWorkspace({
     const initialized = useRef(false);
 
     /*
-     * Reconstruye los filtros guardados en localStorage
-     * cuando el usuario vuelve a entrar.
+     * Revisa si existe un usuario guardado por el login.
      */
+    useEffect(() => {
+        try {
+            const storedUser =
+                localStorage.getItem("user");
+
+            if (!storedUser) {
+                setAuthenticatedFromStorage(false);
+                return;
+            }
+
+            const parsedUser = JSON.parse(storedUser);
+
+            setAuthenticatedFromStorage(
+                Boolean(
+                    parsedUser?.id ||
+                    parsedUser?.email
+                )
+            );
+        } catch (error) {
+            console.error(
+                "Usuario guardado inválido:",
+                error
+            );
+
+            localStorage.removeItem("user");
+            setAuthenticatedFromStorage(false);
+        }
+    }, []);
+
+    const userIsAuthenticated =
+        isAuthenticated ||
+        authenticatedFromStorage;
+
     useEffect(() => {
         if (
             !statusLoaded ||
@@ -176,7 +206,7 @@ export default function GeovisorWorkspace({
                     setStatusDict={setStatusDict}
                     onApply={applyFilters}
                     isAuthenticated={
-                        isAuthenticated
+                        userIsAuthenticated
                     }
                 />
 

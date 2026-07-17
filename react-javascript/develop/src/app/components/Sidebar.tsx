@@ -92,11 +92,10 @@ export default function Sidebar() {
         {/* INICIO */}
         <Link
           href="/dashboard"
-          className={`w-full flex items-center gap-3 text-sm mb-8 px-4 py-3 rounded-[8px] transition ${
-            pathname === "/dashboard"
-              ? "bg-[#4F46E5] text-white"
-              : "hover:bg-[#4338CA] text-white"
-          }`}
+          className={`w-full flex items-center gap-3 text-sm mb-8 px-4 py-3 rounded-[8px] transition ${pathname === "/dashboard"
+            ? "bg-[#4F46E5] text-white"
+            : "hover:bg-[#4338CA] text-white"
+            }`}
         >
           <SidebarIcon src={sidebarIcons.inicio} alt="Inicio" />
 
@@ -112,11 +111,10 @@ export default function Sidebar() {
           <div className="flex flex-col gap-2">
             <Link
               href="/dashboard/perfil"
-              className={`flex items-center gap-3 text-sm px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/perfil"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 text-sm px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/perfil"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon src={sidebarIcons.perfil} alt="Perfil" />
 
@@ -134,11 +132,10 @@ export default function Sidebar() {
           <div className="flex flex-col gap-2 text-sm">
             <Link
               href="/dashboard/resumen-general"
-              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/resumen-general"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/resumen-general"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon
                 src={sidebarIcons.resumenGeneral}
@@ -149,12 +146,26 @@ export default function Sidebar() {
             </Link>
 
             <Link
+              href="/dashboard/climatologia"
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/climatologia"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
+            >
+              <SidebarIcon
+                src={sidebarIcons.prediccionEpidemiologica}
+                alt="Climatologia"
+              />
+
+              <span>Climatologia</span>
+            </Link>
+
+            <Link
               href="/dashboard/indicadores-demograficos"
-              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/indicadores-demograficos"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/indicadores-demograficos"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon
                 src={sidebarIcons.indicadoresDemograficos}
@@ -166,11 +177,10 @@ export default function Sidebar() {
 
             <Link
               href="/dashboard/geovisor-epidemiologico"
-              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/geovisor-epidemiologico"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/geovisor-epidemiologico"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon
                 src={sidebarIcons.geovisorEpidemiologico}
@@ -182,11 +192,10 @@ export default function Sidebar() {
 
             <Link
               href="/dashboard/reportes"
-              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/reportes"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/reportes"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon
                 src={sidebarIcons.reportes}
@@ -198,11 +207,10 @@ export default function Sidebar() {
 
             <Link
               href="/dashboard/prediccion-epidemiologica"
-              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                pathname === "/dashboard/prediccion-epidemiologica"
-                  ? "bg-[#4F46E5] text-white"
-                  : "hover:bg-white/10 text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/prediccion-epidemiologica"
+                ? "bg-[#4F46E5] text-white"
+                : "hover:bg-white/10 text-white"
+                }`}
             >
               <SidebarIcon
                 src={sidebarIcons.prediccionEpidemiologica}
@@ -224,11 +232,10 @@ export default function Sidebar() {
             <div className="flex flex-col gap-2 text-sm">
               <Link
                 href="/dashboard/usuarios"
-                className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                  pathname === "/dashboard/usuarios"
-                    ? "bg-[#4F46E5] text-white"
-                    : "hover:bg-white/10 text-white"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/usuarios"
+                  ? "bg-[#4F46E5] text-white"
+                  : "hover:bg-white/10 text-white"
+                  }`}
               >
                 <SidebarIcon
                   src={sidebarIcons.gestionUsuarios}
@@ -240,11 +247,10 @@ export default function Sidebar() {
 
               <Link
                 href="/dashboard/auditoria"
-                className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${
-                  pathname === "/dashboard/auditoria"
-                    ? "bg-[#4F46E5] text-white"
-                    : "hover:bg-white/10 text-white"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition ${pathname === "/dashboard/auditoria"
+                  ? "bg-[#4F46E5] text-white"
+                  : "hover:bg-white/10 text-white"
+                  }`}
               >
                 <SidebarIcon src={sidebarIcons.auditoria} alt="Auditoría" />
 

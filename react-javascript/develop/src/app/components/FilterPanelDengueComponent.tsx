@@ -345,7 +345,7 @@ export default function FilterPanelDengueComponent({
                         }
                     `}
                 >
-                    Limpiar Departamento
+                    Limpiar Filtros
                 </button>
             </div>
         </div>

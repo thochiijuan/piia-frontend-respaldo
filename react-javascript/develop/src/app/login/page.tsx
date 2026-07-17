@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { logos } from "../../static/js/endpoint_var";
 import { Mail, Lock, EyeOff, AlertCircle, } from "lucide-react";
-
+import type { FormEvent } from "react";
 export default function LoginPage() {
   const router = useRouter();
 
@@ -12,11 +12,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    event?.preventDefault();
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     try {
       setError("");
-      console.log("OMICAS URL:", logos.omicas);
+
       const normalizedUser = user.trim().toLowerCase();
       const normalizedPassword = password.trim();
 
@@ -235,7 +235,7 @@ export default function LoginPage() {
                 className="flex-1 ml-3 outline-none text-sm text-slate-700 bg-transparent"
               />
 
-              <button>
+              <button type="button">
                 <EyeOff
                   size={18}
                   className="text-[#2E6EA6]"
@@ -251,7 +251,6 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              onClick={handleLogin}
               className="bg-[#2E6EA6] hover:bg-[#245985] transition text-white font-medium rounded-full px-14 py-3 text-sm shadow-md"
             >
               Ingresar
