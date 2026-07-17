@@ -10,6 +10,8 @@ import {
 
 import type { Dispatch, SetStateAction } from "react";
 import type { FilterStatus } from "./FilterState";
+import { departmentsIDs } from "../../static/js/endpoint_var";
+
 
 interface GeographicItem {
     id: number | string;
@@ -106,10 +108,26 @@ export default function FilterPanelDengueComponent({
             setLoadingDepartamentos(true);
 
             try {
-                const data = await getDepartamentos();
+                const data =
+                    await getDepartamentos();
+
+                const allDepartments =
+                    Array.isArray(data)
+                        ? data
+                        : [];
+
+                const allowedDepartments =
+                    allDepartments.filter(
+                        (department) =>
+                            allowedDepartmentIds.has(
+                                normalizeGeographicId(
+                                    department.id
+                                )
+                            )
+                    );
 
                 setDepartamentos(
-                    Array.isArray(data) ? data : []
+                    allowedDepartments
                 );
             } catch (error) {
                 console.error(
@@ -214,6 +232,33 @@ export default function FilterPanelDengueComponent({
             municipio: "",
         });
     };
+
+    function normalizeGeographicId(
+        value: string | number
+    ): string {
+        const normalizedValue = String(
+            value
+        ).trim();
+
+        /*
+         * Permite comparar correctamente:
+         * "05" con 5
+         * "08" con 8
+         */
+        if (/^\d+$/.test(normalizedValue)) {
+            return String(
+                Number(normalizedValue)
+            );
+        }
+
+        return normalizedValue;
+    }
+
+    const allowedDepartmentIds = new Set(
+        departmentsIDs.map((departmentId) =>
+            normalizeGeographicId(departmentId)
+        )
+    );
 
     return (
         <div className="p-4 space-y-5 bg-white">

@@ -1,7 +1,9 @@
+import ClimateResourceBrowser from "../../components/ClimateResourceBrowser";
+
 export default function ClimatologiaPage() {
     return (
-        <div className="bg-white rounded-[8px] h-full p-6">
-            CLIMATOLOGIA
+        <div className="h-full min-h-0">
+            <ClimateResourceBrowser />
         </div>
     );
 }

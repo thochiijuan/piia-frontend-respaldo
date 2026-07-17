@@ -17,7 +17,7 @@ const sidebarIcons = {
   indicadoresDemograficos:
     "https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Indicadores%20demograficos.png",
   geovisorEpidemiologico:
-    "https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Geovisor%20epidemiol%C3%B3gico.png",
+    "https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Geovisor%20Epidemiologico.png",
   reportes:
     "https://s3.dorito-develop.com/corporate-brand-assets/public/iconos/Reportes.png",
   prediccionEpidemiologica:

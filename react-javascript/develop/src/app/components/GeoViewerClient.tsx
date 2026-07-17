@@ -9,6 +9,14 @@ import {
 } from "react";
 
 import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  RefreshCw,
+} from "lucide-react";
+
+import {
   geoJSON as createLeafletGeoJSON,
 } from "leaflet";
 
@@ -26,6 +34,7 @@ import type {
 
 import {
   GeoJSON,
+  ImageOverlay,
   LayersControl,
   MapContainer,
   TileLayer,
@@ -40,6 +49,12 @@ import {
   ensureMUNICIPALITYVariableStored,
 } from "../../static/js/municipality_variable_storage";
 
+import { departmentsIDs, departmentsColors } from "../../static/js/endpoint_var";
+
+import {
+  useZarrAnimation,
+} from "./useZarrAnimation";
+
 const DEFAULT_MIN_ZOOM = 4;
 const DEFAULT_MAX_ZOOM = 18;
 
@@ -52,6 +67,36 @@ const MUNICIPALITY_BOUNDS_PADDING = 0.12;
 const WORLD_BOUNDS: LatLngBoundsExpression = [
   [-85, -180],
   [85, 180],
+];
+
+/*
+ * El directorio debe existir como:
+ * public/result.zarr/
+ *
+ * Next lo expone en:
+ * /result.zarr/
+ */
+const TEST_ZARR_URL = "/result.zarr";
+const TEST_ZARR_VARIABLE = "t2m";
+
+/*
+ * Rango fijo de la paleta.
+ * Para temperatura ERA5 en Kelvin puedes empezar
+ * con 260 K a 315 K y después ajustarlo.
+ */
+const TEST_ZARR_MIN_VALUE = 260;
+const TEST_ZARR_MAX_VALUE = 315;
+
+const TEST_ZARR_PALETTE = [
+  "#30123b",
+  "#4145ab",
+  "#2a7bde",
+  "#1ac7c2",
+  "#7ad151",
+  "#fde725",
+  "#fdae32",
+  "#f1602d",
+  "#a50026",
 ];
 
 type ParsedShapefile = FeatureCollection<
@@ -107,6 +152,19 @@ interface MapViewportControllerProps {
 /*
  * Departamentos sin selección.
  */
+const createDepartmentStyle = (
+  color: string
+): PathOptions => ({
+  color,
+  weight: 2.5,
+  opacity: 1,
+  dashArray: "4 7",
+  lineCap: "round",
+
+  fill: true,
+  fillColor: color,
+  fillOpacity: 0.25,
+});
 const defaultDepartmentStyle: PathOptions = {
   color: "#ff0000",
   weight: 2.5,
@@ -115,6 +173,15 @@ const defaultDepartmentStyle: PathOptions = {
   dashArray: "4 7",
   lineCap: "round",
 };
+
+
+
+const departmentColorById = new Map<string, string>(
+  departmentsIDs.map((id, index) => [
+    String(id),
+    departmentsColors[index] ?? "#ff0000",
+  ])
+);
 
 /*
  * Otros departamentos.
@@ -140,12 +207,39 @@ const selectedDepartmentStyle: PathOptions = {
   lineCap: "round",
 };
 
+const createSelectedDepartmentStyle = (
+  color: string
+): PathOptions => ({
+  color,
+  weight: 4,
+  opacity: 1,
+  dashArray: "6 6",
+  lineCap: "round",
+
+  fill: true,
+  fillColor: color,
+  fillOpacity: 0.25,
+});
+
+const normalDepartmentStyle: PathOptions = {
+  // Borde
+  color: "#475569",
+  weight: 0.8,
+  opacity: 1,
+  // dashArray: "4 7",
+  lineCap: "round",
+
+  // Relleno
+  fill: true,
+  fillColor: "#64748b",
+  fillOpacity: 0.28,
+};
 /*
  * Municipios del departamento.
  */
 const municipalityStyle: PathOptions = {
-  color: "#f59e0b",
-  weight: 1.8,
+  color: "#b8a755",
+  weight: 3,
   opacity: 0.9,
   fill: false,
   dashArray: "3 5",
@@ -168,13 +262,17 @@ const inactiveMunicipalityStyle: PathOptions = {
  * Municipio seleccionado.
  */
 const selectedMunicipalityStyle: PathOptions = {
-  color: "#ffd400",
+  color: "#8b7400",
   weight: 4.5,
   opacity: 1,
   fill: false,
   dashArray: "7 5",
   lineCap: "round",
 };
+
+const highlightedDepartmentIds = new Set(
+  departmentsIDs.map((id) => String(id))
+);
 
 function getFeatureId(
   feature: Feature<
@@ -286,6 +384,9 @@ function DepartmentLayer({
   const departmentId = String(
     selectedDepartmentId ?? ""
   );
+  const selectedDepartmentColor =
+    departmentColorById.get(departmentId) ??
+    "#ff0000";
 
   const selectedFeature = useMemo(
     () =>
@@ -301,11 +402,29 @@ function DepartmentLayer({
       <GeoJSON
         key={`departments-${departmentId || "all"}`}
         data={data}
-        style={
-          departmentId
-            ? inactiveDepartmentStyle
-            : defaultDepartmentStyle
-        }
+        style={(feature) => {
+          if (!feature) {
+            return normalDepartmentStyle;
+          }
+
+          const featureId = getFeatureId(
+            feature as Feature<
+              Geometry,
+              GeoJsonProperties
+            >
+          );
+
+          const departmentColor =
+            departmentColorById.get(featureId);
+
+          if (departmentColor) {
+            return createDepartmentStyle(
+              departmentColor
+            );
+          }
+
+          return normalDepartmentStyle;
+        }}
         interactive={false}
       />
 
@@ -320,6 +439,7 @@ function DepartmentLayer({
     </>
   );
 }
+
 function MunicipalityLayer({
   data,
   selectedMunicipalityId,
@@ -553,7 +673,7 @@ function MapViewportController({
 export default function GeoViewerClient({
   selectedDepartmentId,
   selectedMunicipalityId,
-  municipalityIds,
+  municipalityIds = [],
   applyVersion,
 }: GeoViewerClientProps) {
   const [
@@ -575,6 +695,20 @@ export default function GeoViewerClient({
 
   const [error, setError] =
     useState<string | null>(null);
+
+  const zarrAnimation = useZarrAnimation({
+    url: TEST_ZARR_URL,
+    variableName: TEST_ZARR_VARIABLE,
+    latName: "lat",
+    lonName: "lon",
+    timeName: "time",
+    minValue: TEST_ZARR_MIN_VALUE,
+    maxValue: TEST_ZARR_MAX_VALUE,
+    palette: TEST_ZARR_PALETTE,
+    frameDurationMs: 900,
+    opacity: 0.72,
+    cacheSize: 8,
+  });
 
   /*
    * De los 1.122 municipios del shapefile,
@@ -712,7 +846,7 @@ export default function GeoViewerClient({
     );
 
   return (
-    <div className="relative w-full h-full min-h-0">
+    <div className="relative isolate h-full w-full min-h-0 overflow-hidden">
       <MapContainer
         center={[4.5709, -74.2973]}
         zoom={6}
@@ -723,7 +857,7 @@ export default function GeoViewerClient({
         inertia={false}
         bounceAtZoomLimits={false}
         scrollWheelZoom
-        className="w-full h-full z-0"
+        className="absolute inset-0 z-0 h-full w-full"
       >
         {departmentGeoJSON && (
           <MapViewportController
@@ -763,6 +897,23 @@ export default function GeoViewerClient({
               }
             />
           </LayersControl.BaseLayer>
+
+          {zarrAnimation.frameUrl &&
+            zarrAnimation.bounds && (
+              <LayersControl.Overlay
+                checked
+                name={`Zarr animado · ${TEST_ZARR_VARIABLE}`}
+              >
+                <ImageOverlay
+                  key={`zarr-frame-${zarrAnimation.frameIndex}`}
+                  url={zarrAnimation.frameUrl}
+                  bounds={zarrAnimation.bounds}
+                  opacity={zarrAnimation.opacity}
+                  zIndex={350}
+                  interactive={false}
+                />
+              </LayersControl.Overlay>
+            )}
         </LayersControl>
 
         {departmentGeoJSON && (
@@ -783,6 +934,202 @@ export default function GeoViewerClient({
           />
         )}
       </MapContainer>
+
+      <div
+        className="
+    pointer-events-auto
+    absolute
+    left-1/2
+    top-3
+    z-[5000]
+    w-[min(760px,calc(100%_-_32px))]
+    -translate-x-1/2
+    rounded-[10px]
+    border border-slate-200
+    bg-white/95
+    p-3
+    shadow-xl
+    backdrop-blur
+  "
+      >
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              zarrAnimation.setFrameIndex(
+                zarrAnimation.frameIndex - 1
+              )
+            }
+            disabled={
+              zarrAnimation.frameCount <= 1 ||
+              zarrAnimation.isLoadingFrame
+            }
+            title="Frame anterior"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={
+              zarrAnimation.togglePlaying
+            }
+            disabled={
+              zarrAnimation.frameCount <= 1 ||
+              zarrAnimation.isLoadingMetadata
+            }
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            title={
+              zarrAnimation.isPlaying
+                ? "Pausar animación"
+                : "Reproducir animación"
+            }
+          >
+            {zarrAnimation.isPlaying ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              zarrAnimation.setFrameIndex(
+                zarrAnimation.frameIndex + 1
+              )
+            }
+            disabled={
+              zarrAnimation.frameCount <= 1 ||
+              zarrAnimation.isLoadingFrame
+            }
+            title="Frame siguiente"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={zarrAnimation.reload}
+            disabled={
+              zarrAnimation.isLoadingMetadata
+            }
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[7px] border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            title="Recargar Zarr"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${zarrAnimation.isLoadingMetadata
+                ? "animate-spin"
+                : ""
+                }`}
+            />
+          </button>
+
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center justify-between gap-3 text-[11px] text-slate-500">
+              <span className="truncate font-medium text-slate-700">
+                {zarrAnimation.currentTimeLabel}
+              </span>
+
+              <span className="shrink-0">
+                {zarrAnimation.frameCount > 0
+                  ? `${zarrAnimation.frameIndex + 1
+                  } / ${zarrAnimation.frameCount
+                  }`
+                  : "Sin frames"}
+              </span>
+            </div>
+
+            <input
+              type="range"
+              min={0}
+              max={Math.max(
+                zarrAnimation.frameCount - 1,
+                0
+              )}
+              step={1}
+              value={zarrAnimation.frameIndex}
+              onChange={(event) =>
+                zarrAnimation.setFrameIndex(
+                  Number(event.target.value)
+                )
+              }
+              disabled={
+                zarrAnimation.frameCount === 0
+              }
+              className="w-full accent-blue-600"
+            />
+          </div>
+
+          <label className="hidden shrink-0 text-[11px] text-slate-500 sm:block">
+            Velocidad
+            <select
+              value={
+                zarrAnimation.frameDurationMs
+              }
+              onChange={(event) =>
+                zarrAnimation.setFrameDurationMs(
+                  Number(event.target.value)
+                )
+              }
+              className="ml-2 rounded-[6px] border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"
+            >
+              <option value={1500}>Lenta</option>
+              <option value={900}>Normal</option>
+              <option value={450}>Rápida</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="mt-2 flex items-center gap-3">
+          <span className="text-[10px] text-slate-500">
+            {TEST_ZARR_MIN_VALUE}
+          </span>
+
+          <div
+            className="h-2 flex-1 rounded-full"
+            style={{
+              background: `linear-gradient(to right, ${TEST_ZARR_PALETTE.join(
+                ", "
+              )})`,
+            }}
+          />
+
+          <span className="text-[10px] text-slate-500">
+            {TEST_ZARR_MAX_VALUE}
+          </span>
+
+          <label className="ml-2 flex items-center gap-2 text-[10px] text-slate-500">
+            Opacidad
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={zarrAnimation.opacity}
+              onChange={(event) =>
+                zarrAnimation.setOpacity(
+                  Number(event.target.value)
+                )
+              }
+              className="w-20 accent-blue-600"
+            />
+          </label>
+        </div>
+
+        {zarrAnimation.isLoadingFrame && (
+          <p className="mt-2 text-[11px] text-blue-600">
+            Cargando frame Zarr…
+          </p>
+        )}
+
+        {zarrAnimation.error && (
+          <p className="mt-2 break-words text-[11px] text-red-600">
+            {zarrAnimation.error}
+          </p>
+        )}
+      </div>
 
       {hasSelectedMunicipality && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">

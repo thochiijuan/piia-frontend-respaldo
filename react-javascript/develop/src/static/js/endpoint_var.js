@@ -33,3 +33,6 @@ export const endpoints = {
     repository_endpoint,
     georeferencer_endpoint,
 };
+
+export const departmentsIDs = [3, 8, 13, 17, 30]
+export const departmentsColors = ["#E71224", "#00A0D7", "#66CC00", "#FFC114", "#AB008B"]
