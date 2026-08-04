@@ -30,7 +30,11 @@ export interface AgeGroupData {
 }
 
 /**
- * Casos por sexo.
+ * ============================================================================
+ * Casos por sexo
+ * ----------------------------------------------------------------------------
+ * Representa la distribución de casos por sexo.
+ * ============================================================================
  */
 export interface GenderData {
 
@@ -44,14 +48,19 @@ export interface GenderData {
      */
     cases: number;
 
+    /**
+     * Porcentaje respecto al total de casos.
+     */
+    percentage: number;
+
 }
 
 /**
- * Casos por ciclo de vida.
- */
-/**
  * ============================================================================
  * Casos por ciclo de vida
+ * ----------------------------------------------------------------------------
+ * Representa la cantidad de casos de Dengue e IRA
+ * para cada etapa del ciclo de vida.
  * ============================================================================
  */
 export interface LifeCycleData {
@@ -60,6 +69,13 @@ export interface LifeCycleData {
      * Etapa del ciclo de vida.
      */
     stage: string;
+
+    /**
+     * Rango de edad correspondiente.
+     * Ejemplo:
+     * (0 - 5 años)
+     */
+    ageRange: string;
 
     /**
      * Casos de Dengue.

@@ -119,85 +119,65 @@ export const ageGroupMock: AgeGroupData[] = [
 ];
 
 export const genderMock: GenderData[] = [
-
     {
-
         gender: "Masculino",
-
-        cases: 58,
-
+        cases: 6652,
+        percentage: 52.6,
     },
-
     {
-
         gender: "Femenino",
-
-        cases: 42,
-
+        cases: 5994,
+        percentage: 47.4,
     },
-
 ];
 
+/**
+ * ============================================================================
+ * Casos por ciclo de vida
+ * ============================================================================
+ */
 export const lifeCycleMock: LifeCycleData[] = [
 
     {
-
         stage: "Primera infancia",
-
+        ageRange: "(0 - 5 años)",
         dengue: 1245,
-
         ira: 1976,
-
     },
 
     {
-
         stage: "Infancia",
-
+        ageRange: "(6 - 11 años)",
         dengue: 1102,
-
         ira: 3167,
-
     },
 
     {
-
         stage: "Adolescencia",
-
+        ageRange: "(12 - 17 años)",
         dengue: 1239,
-
         ira: 1788,
-
     },
 
     {
-
         stage: "Juventud",
-
+        ageRange: "(18 - 28 años)",
         dengue: 2145,
-
         ira: 2356,
-
     },
 
     {
-
         stage: "Adulto",
-
+        ageRange: "(29 - 59 años)",
         dengue: 3200,
-
         ira: 3987,
-
     },
 
     {
-
         stage: "Adulto Mayor",
-
+        ageRange: "(60 años y más)",
         dengue: 1899,
-
         ira: 2489,
-
     },
 
 ];

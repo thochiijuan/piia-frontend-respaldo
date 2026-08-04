@@ -1,5 +1,7 @@
 import DemographicSummaryCards from "./cards/DemographicSummaryCards";
 import AgeGroupChart from "./charts/AgeGroupChart";
+import GenderChart from "./charts/GenderChart";
+import LifeCycleChart from "./charts/LifeCycleChart";
 
 export default function DemographicIndicators() {
 
@@ -18,6 +20,18 @@ export default function DemographicIndicators() {
                 <div className="col-span-12 lg:col-span-4">
 
                     <AgeGroupChart />
+
+                </div>
+
+                <div className="col-span-12 lg:col-span-4">
+
+                    <GenderChart />
+
+                </div>
+
+                <div className="col-span-12 lg:col-span-4">
+
+                    <LifeCycleChart />
 
                 </div>
 
