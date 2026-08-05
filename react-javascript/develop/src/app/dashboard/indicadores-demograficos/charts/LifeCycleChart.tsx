@@ -18,6 +18,34 @@ import { LifeCycleData } from "../data/demographicCharts";
 
 import { getLifeCycleData } from "../services/demographicCharts.service";
 
+interface YAxisTickProps {
+    x?: number;
+    y?: number;
+    payload?: {
+        value?: string;
+    };
+}
+
+function LeftAlignedYAxisTick({
+    x = 0,
+    y = 0,
+    payload,
+}: YAxisTickProps) {
+    return (
+        <text
+            x={x - 125}
+            y={y}
+            dy={4}
+            textAnchor="start"
+            fill="#475569"
+            fontSize={12}
+            fontWeight={600}
+        >
+            {payload?.value}
+        </text>
+    );
+}
+
 function CustomTooltip({ active, payload }: any) {
 
     if (!active || !payload || !payload.length) {
@@ -115,6 +143,23 @@ export default function LifeCycleChart() {
 
     }, []);
 
+    const maxCases = Math.max(
+        0,
+        ...data.map((item) =>
+            Math.max(item.dengue, item.ira)
+        )
+    );
+
+    const axisMaximum = Math.max(
+        4000,
+        Math.ceil(maxCases / 1000) * 1000
+    );
+
+    const axisTicks = Array.from(
+        { length: axisMaximum / 1000 + 1 },
+        (_, index) => index * 1000
+    );
+
     return (
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-[430px] flex flex-col">
@@ -143,86 +188,139 @@ export default function LifeCycleChart() {
                 GRÁFICO
             ============================================================ */}
 
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col min-h-0">
 
-                <ResponsiveContainer
-                    width="100%"
-                    height="100%"
+                <div
+                    className="
+        relative
+        flex-1
+        min-h-0
+        border-t
+        border-slate-200
+        pt-4
+    "
                 >
+                    {/* Línea inferior extendida */}
+                    <div
+                        className="
+            pointer-events-none
+            absolute
+            bottom-[28px]
+            left-0
+            right-0
+            z-10
+            h-px
+            bg-slate-300
+        "
+                    />
 
-                    <BarChart
-                        data={data}
-                        layout="vertical"
-                        margin={{
-                            top: 10,
-                            right: 30,
-                            left: 80,
-                            bottom: 10,
-                        }}
-                        barCategoryGap="25%"
-                    >
+                    <ResponsiveContainer width="100%" height="100%">
 
-                        <CartesianGrid
-                            horizontal={false}
-                            stroke="#E2E8F0"
-                        />
-
-                        <XAxis
-                            type="number"
-                        />
-
-                        <YAxis
-                            type="category"
-                            dataKey="stage"
-                            width={120}
-                            tickLine={false}
-                            axisLine={false}
-                            tick={{
-                                fill: "#475569",
-                                fontSize: 13,
+                        <BarChart
+                            data={data}
+                            layout="vertical"
+                            margin={{
+                                top: 0,
+                                right: 45,
+                                left: 0,
+                                bottom: 0,
                             }}
-                        />
-
-                        <Tooltip
-                            cursor={{
-                                fill: "#F8FAFC",
-                            }}
-                            content={<CustomTooltip />}
-                        />
-
-                        <Legend />
-
-                        <Bar
-                            dataKey="dengue"
-                            name="Dengue"
-                            fill="#6D4CFF"
-                            radius={[0, 6, 6, 0]}
+                            barGap={6}
+                            barCategoryGap="32%"
                         >
 
-                            <LabelList
+                            <CartesianGrid
+                                horizontal={false}
+                                stroke="#E2E8F0"
+                            />
+
+                            <XAxis
+                                type="number"
+                                domain={[0, axisMaximum]}
+                                ticks={axisTicks}
+                                height={28}
+                                tickFormatter={(value: number) =>
+                                    value === 0 ? "0" : `${value / 1000}k`
+                                }
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{
+                                    fill: "#475569",
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                }}
+                            />
+
+                            <YAxis
+                                type="category"
+                                dataKey="stage"
+                                width={135}
+                                interval={0}
+                                tick={<LeftAlignedYAxisTick />}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+
+                            <Tooltip
+                                cursor={{
+                                    fill: "#F8FAFC",
+                                }}
+                                content={<CustomTooltip />}
+                            />
+
+                            <Bar
                                 dataKey="dengue"
-                                position="right"
-                            />
+                                name="Dengue"
+                                fill="#6D4CFF"
+                                barSize={7}
+                                radius={[0, 6, 6, 0]}
+                            >
+                                <LabelList
+                                    dataKey="dengue"
+                                    position="right"
+                                    fontSize={10}
+                                    fill="#64748B"
+                                />
+                            </Bar>
 
-                        </Bar>
-
-                        <Bar
-                            dataKey="ira"
-                            name="IRA"
-                            fill="#5BC98C"
-                            radius={[0, 6, 6, 0]}
-                        >
-
-                            <LabelList
+                            <Bar
                                 dataKey="ira"
-                                position="right"
-                            />
+                                name="IRA"
+                                fill="#5BC98C"
+                                barSize={7}
+                                radius={[0, 6, 6, 0]}
+                            >
+                                <LabelList
+                                    dataKey="ira"
+                                    position="right"
+                                    fontSize={10}
+                                    fill="#64748B"
+                                />
+                            </Bar>
 
-                        </Bar>
+                        </BarChart>
 
-                    </BarChart>
+                    </ResponsiveContainer>
 
-                </ResponsiveContainer>
+                </div>
+
+                <p className="-mt-1 text-center text-[11px] font-bold leading-none text-slate-600">
+                    Casos
+                </p>
+
+                <div className="mt-2 flex justify-center gap-4 text-sm">
+
+                    <div className="flex items-center gap-1.5 text-[#6D4CFF]">
+                        <span className="h-3 w-3 rounded-[3px] bg-[#6D4CFF]" />
+                        Dengue
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-[#5BC98C]">
+                        <span className="h-3 w-3 rounded-[3px] bg-[#5BC98C]" />
+                        IRA
+                    </div>
+
+                </div>
 
             </div>
 

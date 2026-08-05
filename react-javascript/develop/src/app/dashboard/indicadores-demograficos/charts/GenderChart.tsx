@@ -88,7 +88,7 @@ export default function GenderChart() {
 
                 <div className="w-full max-w-[620px]">
 
-                    <div className="grid grid-cols-[1fr_170px_1fr] items-center gap-2">
+                    <div className="grid grid-cols-[1fr_230px_1fr] items-center gap-2">
 
                         {/* ================= Masculino ================= */}
 
@@ -116,8 +116,7 @@ export default function GenderChart() {
 
                         {/* ================= Dona (Temporal) ================= */}
 
-                        <div className="relative flex justify-center items-center w-[180px] h-[180px]">
-
+                        <div className="relative h-[230px] w-[230px] shrink-0">
                             <ResponsiveContainer width="100%" height="100%">
 
                                 <PieChart>
@@ -127,8 +126,8 @@ export default function GenderChart() {
                                         dataKey="value"
                                         cx="50%"
                                         cy="50%"
-                                        innerRadius={62}
-                                        outerRadius={82}
+                                        innerRadius={66}
+                                        outerRadius={90}
                                         startAngle={90}
                                         endAngle={-270}
                                         paddingAngle={2}
