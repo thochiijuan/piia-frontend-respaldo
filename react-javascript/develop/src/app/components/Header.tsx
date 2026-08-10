@@ -2,162 +2,313 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
 import {
-  Settings,
-  UserCircle,
-  LogOut,
+    Settings,
+    UserCircle,
+    LogOut,
 } from "lucide-react";
 
 import DashboardFilters from "../dashboard/resumen-general/DashboardFilters";
 
+import GeovisorFilters from "../dashboard/geovisor-epidemiologico/components/GeovisorFilters";
+
+interface UserData {
+    name?: string;
+}
+
 export default function Header() {
-  const pathname = usePathname();
-  const router = useRouter();
 
-  const [openMenu, setOpenMenu] = useState(false);
-  const [user, setUser] = useState<any>(null);
+    const pathname = usePathname();
+    const router = useRouter();
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const [openMenu, setOpenMenu] = useState(false);
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    const [user, setUser] =
+        useState<UserData | null>(null);
 
-  const titles: Record<string, string> = {
-    "/dashboard": "Inicio y Geovisor epidemiológico",
-    "/dashboard/perfil": "Perfil",
-    "/dashboard/resumen-general": "Resumen General",
-    "/dashboard/indicadores-demograficos": "Indicadores demográficos",
-    "/dashboard/geovisor-epidemiologico": "Geovisor epidemiológico",
-    "/dashboard/reportes": "Reportes y exportación",
-    "/dashboard/prediccion-epidemiologica":
-      "Predicción epidemiológica",
-    "/dashboard/auditoria": "Auditoría",
-    "/dashboard/usuarios": "Gestión de usuarios",
-  };
+    useEffect(() => {
 
-  const subtitles: Record<string, string> = {
-    "/dashboard":
-      "Visualización general del sistema.",
+        const storedUser =
+            localStorage.getItem("user");
 
-    "/dashboard/perfil":
-      "Información del usuario.",
+        if (storedUser) {
 
-    "/dashboard/resumen-general":
-      "Panorama epidemiológico de Dengue e IRA.",
+            setUser(
+                JSON.parse(storedUser)
+            );
 
-    "/dashboard/indicadores-demograficos":
-      "Análisis de la población.",
+        }
 
-    "/dashboard/geovisor-epidemiologico":
-      "Visualización espacial de los casos.",
+    }, []);
 
-    "/dashboard/reportes":
-      "Exportación de información.",
+    /**
+     * ============================================================================
+     * TÍTULOS
+     * ============================================================================
+     */
+    const titles: Record<string, string> = {
 
-    "/dashboard/prediccion-epidemiologica":
-      "Modelos predictivos epidemiológicos.",
+        "/dashboard":
+            "Inicio y Geovisor epidemiológico",
 
-    "/dashboard/auditoria":
-      "Seguimiento de acciones del sistema.",
+        "/dashboard/perfil":
+            "Perfil",
 
-    "/dashboard/usuarios":
-      "Administración de usuarios.",
-  };
+        "/dashboard/resumen-general":
+            "Resumen General",
 
-  const showDashboardFilters =
-    pathname === "/dashboard/resumen-general";
+        "/dashboard/indicadores-demograficos":
+            "Indicadores demográficos",
 
-  return (
-    <header className="bg-white rounded-xl border border-slate-200 px-6 py-4 flex items-center justify-between">
+        "/dashboard/geovisor-epidemiologico":
+            "Geovisor epidemiológico",
 
-      {/* IZQUIERDA */}
+        "/dashboard/reportes":
+            "Reportes y exportación",
 
-      <div>
+        "/dashboard/prediccion-epidemiologica":
+            "Predicción epidemiológica",
 
-        <h1 className="text-[32px] font-bold text-slate-800">
+        "/dashboard/auditoria":
+            "Auditoría",
 
-          {titles[pathname] || "Dashboard"}
+        "/dashboard/usuarios":
+            "Gestión de usuarios",
 
-        </h1>
+    };
 
-        <p className="text-[15px] text-slate-500 mt-1">
+    /**
+     * ============================================================================
+     * SUBTÍTULOS
+     * ============================================================================
+     */
+    const subtitles: Record<string, string> = {
 
-          {subtitles[pathname] || ""}
+        "/dashboard":
+            "Visualización general del sistema.",
 
-        </p>
+        "/dashboard/perfil":
+            "Información del usuario.",
 
-      </div>
+        "/dashboard/resumen-general":
+            "Panorama epidemiológico de Dengue e IRA.",
 
-      {/* DERECHA */}
+        "/dashboard/indicadores-demograficos":
+            "Análisis de la población.",
 
-      <div className="flex items-center gap-8">
+        "/dashboard/geovisor-epidemiologico":
+            "Visualización espacial de los casos.",
 
-        {/* SOLO EN RESUMEN GENERAL */}
+        "/dashboard/reportes":
+            "Exportación de información.",
 
-        {showDashboardFilters && (
-          <DashboardFilters />
-        )}
+        "/dashboard/prediccion-epidemiologica":
+            "Modelos predictivos epidemiológicos.",
 
-        {/* USUARIO */}
+        "/dashboard/auditoria":
+            "Seguimiento de acciones del sistema.",
 
-        <div className="relative flex items-center gap-4">
+        "/dashboard/usuarios":
+            "Administración de usuarios.",
 
-          <span className="flex items-center gap-2 text-sm text-slate-700">
+    };
 
-            🧑‍⚕️ {user?.name || "Usuario"}
+    /**
+     * ============================================================================
+     * FILTROS SEGÚN EL MÓDULO
+     * ============================================================================
+     */
+    const showDashboardFilters =
+        pathname === "/dashboard/resumen-general";
 
-          </span>
+    const showGeovisorFilters =
+        pathname === "/dashboard/geovisor-epidemiologico";
 
-          <button
-            onClick={() => setOpenMenu(!openMenu)}
-            className="hover:bg-slate-100 transition p-2 rounded-full"
-          >
-            <Settings size={18} />
-          </button>
+    return (
 
-          {openMenu && (
+        <header
+            className="
+                flex
+                items-center
+                justify-between
+                gap-6
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                px-6
+                py-5
+            "
+        >
 
-            <div className="absolute top-12 right-0 w-[190px] bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
+            {/* ============================================================
+                IZQUIERDA
+            ============================================================ */}
 
-              <button
-                onClick={() => router.push("/dashboard/perfil")}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-slate-50 transition"
-              >
+            <div className="shrink-0">
 
-                <UserCircle size={16} />
+                <h1 className="text-[32px] font-bold text-slate-800">
 
-                Ver perfil
+                    {titles[pathname] || "Dashboard"}
 
-              </button>
+                </h1>
 
-              <button
-                onClick={() => {
+                <p className="mt-1 text-[15px] text-slate-500">
 
-                  localStorage.removeItem("user");
+                    {subtitles[pathname] || ""}
 
-                  router.push("/login");
-
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-slate-50 transition border-t border-slate-100"
-              >
-
-                <LogOut size={16} />
-
-                Cerrar sesión
-
-              </button>
+                </p>
 
             </div>
 
-          )}
+            {/* ============================================================
+                DERECHA
+            ============================================================ */}
 
-        </div>
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-6">
 
-      </div>
+                {/* ========================================================
+                    FILTROS - RESUMEN GENERAL
+                ======================================================== */}
 
-    </header>
-  );
+                {showDashboardFilters && (
+
+                    <DashboardFilters />
+
+                )}
+
+                {/* ========================================================
+                    FILTROS - GEOVISOR EPIDEMIOLÓGICO
+                ======================================================== */}
+
+                {showGeovisorFilters && (
+
+                    <GeovisorFilters />
+
+                )}
+
+                {/* ========================================================
+                    USUARIO
+                ======================================================== */}
+
+                <div className="relative flex shrink-0 items-center gap-4">
+
+                    <span className="flex items-center gap-2 whitespace-nowrap text-sm text-slate-700">
+
+                        🧑‍⚕️ {user?.name || "Usuario"}
+
+                    </span>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setOpenMenu(!openMenu)
+                        }
+                        className="
+                            rounded-full
+                            p-2
+                            transition
+                            hover:bg-slate-100
+                        "
+                    >
+
+                        <Settings size={18} />
+
+                    </button>
+
+                    {/* ====================================================
+                        MENÚ DE USUARIO
+                    ==================================================== */}
+
+                    {openMenu && (
+
+                        <div
+                            className="
+                                absolute
+                                right-0
+                                top-12
+                                z-50
+                                w-[190px]
+                                overflow-hidden
+                                rounded-xl
+                                border
+                                border-slate-200
+                                bg-white
+                                shadow-lg
+                            "
+                        >
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    router.push(
+                                        "/dashboard/perfil"
+                                    )
+                                }
+                                className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    gap-3
+                                    px-4
+                                    py-3
+                                    text-sm
+                                    transition
+                                    hover:bg-slate-50
+                                "
+                            >
+
+                                <UserCircle size={16} />
+
+                                Ver perfil
+
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+
+                                    localStorage.removeItem(
+                                        "user"
+                                    );
+
+                                    router.push(
+                                        "/login"
+                                    );
+
+                                }}
+                                className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    gap-3
+                                    border-t
+                                    border-slate-100
+                                    px-4
+                                    py-3
+                                    text-sm
+                                    transition
+                                    hover:bg-slate-50
+                                "
+                            >
+
+                                <LogOut size={16} />
+
+                                Cerrar sesión
+
+                            </button>
+
+                        </div>
+
+                    )}
+
+                </div>
+
+            </div>
+
+        </header>
+
+    );
+
 }
