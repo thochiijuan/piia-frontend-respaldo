@@ -18,18 +18,30 @@ import {
 } from "lucide-react";
 
 import type {
-    PredictionClimateInput,
+    PredictionMunicipality,
+    PredictionMunicipalityFactors,
+    PredictionMunicipalityFactorsResponse,
 } from "../data/predictionApi";
 
 import {
-    createMeanClimateInput,
-    getPredictionClimateRanges,
+    getPredictionMunicipalityFactors,
 } from "../services/predictionApi.service";
 
 
 /* ============================================================================
    TIPOS
 ============================================================================ */
+
+interface PredictionScenarioFactorsProps {
+
+    municipalities:
+        PredictionMunicipality[];
+
+    selectedMunicipalityCode:
+        string;
+
+}
+
 
 interface FactorItemProps {
 
@@ -182,12 +194,18 @@ function formatNumber(
    COMPONENTE PRINCIPAL
 ============================================================================ */
 
-export default function PredictionScenarioFactors() {
+export default function PredictionScenarioFactors({
+
+    municipalities,
+
+    selectedMunicipalityCode,
+
+}: PredictionScenarioFactorsProps) {
 
     const [
-        climate,
-        setClimate,
-    ] = useState<PredictionClimateInput | null>(
+        response,
+        setResponse,
+    ] = useState<PredictionMunicipalityFactorsResponse | null>(
         null
     );
 
@@ -203,7 +221,19 @@ export default function PredictionScenarioFactors() {
 
 
     /* ============================================================
-       CARGA DEL ESCENARIO BASE
+       MUNICIPIO SELECCIONADO
+    ============================================================ */
+
+    const selectedMunicipality =
+        municipalities.find(
+            (municipality) =>
+                municipality.code ===
+                selectedMunicipalityCode
+        ) ?? null;
+
+
+    /* ============================================================
+       CARGA DE FACTORES DEL MUNICIPIO
     ============================================================ */
 
     useEffect(() => {
@@ -213,6 +243,23 @@ export default function PredictionScenarioFactors() {
 
         async function loadScenario() {
 
+            if (
+                !selectedMunicipality
+            ) {
+
+                setResponse(null);
+
+                setLoading(false);
+
+                setError(
+                    "No fue posible identificar el municipio seleccionado."
+                );
+
+                return;
+
+            }
+
+
             try {
 
                 setLoading(true);
@@ -220,13 +267,9 @@ export default function PredictionScenarioFactors() {
                 setError(null);
 
 
-                const ranges =
-                    await getPredictionClimateRanges();
-
-
-                const meanScenario =
-                    createMeanClimateInput(
-                        ranges
+                const municipalityFactors =
+                    await getPredictionMunicipalityFactors(
+                        selectedMunicipality.name
                     );
 
 
@@ -235,14 +278,14 @@ export default function PredictionScenarioFactors() {
                 }
 
 
-                setClimate(
-                    meanScenario
+                setResponse(
+                    municipalityFactors
                 );
 
             } catch (loadError) {
 
                 console.error(
-                    "Error cargando escenario predictivo:",
+                    "Error cargando factores del municipio:",
                     loadError
                 );
 
@@ -255,8 +298,10 @@ export default function PredictionScenarioFactors() {
                 setError(
                     loadError instanceof Error
                         ? loadError.message
-                        : "No fue posible cargar el escenario."
+                        : "No fue posible cargar los factores del municipio."
                 );
+
+                setResponse(null);
 
             } finally {
 
@@ -278,7 +323,18 @@ export default function PredictionScenarioFactors() {
 
         };
 
-    }, []);
+    }, [
+        selectedMunicipality,
+    ]);
+
+
+    /* ============================================================
+       FACTORES
+    ============================================================ */
+
+    const factors:
+        PredictionMunicipalityFactors | null =
+        response?.factors ?? null;
 
 
     /* ============================================================
@@ -325,7 +381,7 @@ export default function PredictionScenarioFactors() {
                             text-[10px]
                         "
                     >
-                        Cargando escenario...
+                        Cargando factores del municipio...
                     </span>
 
                 </div>
@@ -343,7 +399,8 @@ export default function PredictionScenarioFactors() {
 
     if (
         error ||
-        !climate
+        !factors ||
+        !response
     ) {
 
         return (
@@ -487,7 +544,7 @@ export default function PredictionScenarioFactors() {
                                 text-violet-500
                             "
                         >
-                            Media histórica de las variables
+                            Último estado disponible de {response.municipality}
                         </p>
 
                     </div>
@@ -507,7 +564,7 @@ export default function PredictionScenarioFactors() {
                             text-violet-600
                         "
                     >
-                        Modelo XGBoost
+                        {response.date}
                     </span>
 
                 </div>
@@ -547,7 +604,7 @@ export default function PredictionScenarioFactors() {
                         }
                         label="Precipitación media"
                         value={`${formatNumber(
-                            climate.precip_mean
+                            factors.precip_mean
                         )} mm`}
                         detail="precip_mean"
                         iconClassName="
@@ -567,7 +624,7 @@ export default function PredictionScenarioFactors() {
                         }
                         label="Temperatura media"
                         value={`${formatNumber(
-                            climate.temp_mean
+                            factors.temp_mean
                         )} °C`}
                         detail="temp_mean"
                         iconClassName="
@@ -587,7 +644,7 @@ export default function PredictionScenarioFactors() {
                         }
                         label="Temperatura máxima"
                         value={`${formatNumber(
-                            climate.temp_max_mean
+                            factors.temp_max_mean
                         )} °C`}
                         detail="temp_max_mean"
                         iconClassName="
@@ -607,7 +664,7 @@ export default function PredictionScenarioFactors() {
                         }
                         label="Temperatura mínima"
                         value={`${formatNumber(
-                            climate.temp_min_mean
+                            factors.temp_min_mean
                         )} °C`}
                         detail="temp_min_mean"
                         iconClassName="
@@ -627,7 +684,7 @@ export default function PredictionScenarioFactors() {
                         }
                         label="Humedad relativa"
                         value={`${formatNumber(
-                            climate.rh_mean
+                            factors.rh_mean
                         )} %`}
                         detail="rh_mean"
                         iconClassName="
@@ -668,7 +725,10 @@ export default function PredictionScenarioFactors() {
                         />
                     }
                     label="Casos previos"
-                    value={`${climate.dengue_lag1}`}
+                    value={`${formatNumber(
+                        factors.dengue_lag1,
+                        0
+                    )}`}
                     detail="dengue_lag1 · rezago de 1 periodo"
                     iconClassName="
                         bg-violet-50
@@ -702,9 +762,10 @@ export default function PredictionScenarioFactors() {
                         text-amber-700
                     "
                 >
-                    Estos valores representan el escenario medio utilizado
-                    actualmente para generar la predicción. No corresponden
-                    a condiciones climáticas en tiempo real.
+                    Estos valores corresponden al último estado disponible
+                    utilizado por el modelo como semilla predictiva para
+                    {` ${response.municipality}`}. No corresponden a condiciones
+                    climáticas en tiempo real.
                 </p>
 
             </div>

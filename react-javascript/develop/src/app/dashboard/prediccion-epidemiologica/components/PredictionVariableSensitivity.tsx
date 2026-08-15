@@ -39,9 +39,9 @@ import type {
 } from "../data/predictionApi";
 
 import {
-    createMeanClimateInput,
     getForecastByHorizon,
     getPredictionClimateRanges,
+    getPredictionMunicipalityFactors,
     predictMunicipality,
 } from "../services/predictionApi.service";
 
@@ -196,11 +196,25 @@ function formatNumber(
 
 /* ============================================================================
    GENERAR VALORES DE SENSIBILIDAD
+
+   La ventana se construye alrededor del valor BASE DEL MUNICIPIO.
+
+   Ejemplo:
+
+   valor base - 2 desviaciones estándar
+                  ↓
+              valor base
+                  ↓
+   valor base + 2 desviaciones estándar
+
+   Los límites siempre se restringen utilizando min/max
+   de /climate-ranges.
 ============================================================================ */
 
 function createSensitivityValues(
     ranges: PredictionClimateRangesResponse,
-    variable: VariableDefinition
+    variable: VariableDefinition,
+    baseValue: number
 ): number[] {
 
     const range =
@@ -209,23 +223,10 @@ function createSensitivityValues(
         ];
 
 
-    /*
-     * Ventana de análisis:
-     *
-     * media - 2 desviaciones estándar
-     *             ↓
-     *           media
-     *             ↓
-     * media + 2 desviaciones estándar
-     *
-     * Siempre respetando los límites reales
-     * entregados por /climate-ranges.
-     */
-
     const lower =
         Math.max(
             range.min,
-            range.mean -
+            baseValue -
             range.std * 2
         );
 
@@ -233,69 +234,99 @@ function createSensitivityValues(
     const upper =
         Math.min(
             range.max,
-            range.mean +
+            baseValue +
             range.std * 2
         );
 
 
-    const numberOfPoints =
-        7;
+    /*
+     * Generamos tres valores debajo del escenario base,
+     * el escenario base y tres valores por encima.
+     *
+     * Esto garantiza que el punto base esté siempre
+     * incluido en el análisis.
+     */
+
+    const lowerStep =
+        (
+            baseValue -
+            lower
+        ) / 3;
 
 
-    const step =
-        (upper - lower) /
-        (numberOfPoints - 1);
+    const upperStep =
+        (
+            upper -
+            baseValue
+        ) / 3;
 
 
-    const values =
-        Array.from(
-            {
-                length:
-                    numberOfPoints,
-            },
-            (_, index) => {
+    let values = [
 
-                let value =
-                    lower +
-                    step * index;
+        lower,
 
+        baseValue -
+        lowerStep * 2,
 
-                /*
-                 * dengue_lag1 representa casos,
-                 * por lo que debe manejarse como entero.
-                 */
+        baseValue -
+        lowerStep,
 
-                if (
-                    variable.key ===
-                    "dengue_lag1"
-                ) {
+        baseValue,
 
-                    value =
-                        Math.max(
-                            1,
-                            Math.round(
-                                value
-                            )
-                        );
+        baseValue +
+        upperStep,
 
-                }
+        baseValue +
+        upperStep * 2,
 
+        upper,
 
-                return value;
-
-            }
-        );
+    ];
 
 
     /*
-     * Evitamos valores repetidos después
-     * del redondeo de dengue_lag1.
+     * dengue_lag1 representa número de casos.
+     * Debe manejarse como entero.
+     */
+
+    if (
+        variable.key ===
+        "dengue_lag1"
+    ) {
+
+        values =
+            values.map(
+                (value) =>
+                    Math.max(
+                        range.min,
+                        Math.min(
+                            range.max,
+                            Math.round(
+                                value
+                            )
+                        )
+                    )
+            );
+
+    }
+
+
+    /*
+     * Eliminamos posibles duplicados.
+     *
+     * Esto puede ocurrir principalmente cuando:
+     *
+     * - dengue_lag1 se redondea.
+     * - el valor base está cerca de min/max.
      */
 
     return Array.from(
         new Set(
             values
         )
+    ).sort(
+        (a, b) =>
+            a - b
     );
 
 }
@@ -348,6 +379,14 @@ export default function PredictionVariableSensitivity({
     const [
         baseCases,
         setBaseCases,
+    ] = useState<number | null>(
+        null
+    );
+
+
+    const [
+        baseVariableValue,
+        setBaseVariableValue,
     ] = useState<number | null>(
         null
     );
@@ -418,7 +457,17 @@ export default function PredictionVariableSensitivity({
     useEffect(() => {
 
         if (!selectedMunicipality) {
+
+            setPoints([]);
+
+            setBaseCases(null);
+
+            setBaseVariableValue(null);
+
+            setLoading(false);
+
             return;
+
         }
 
 
@@ -441,23 +490,89 @@ export default function PredictionVariableSensitivity({
 
 
                 /* ====================================================
-                   RANGOS + ESCENARIO BASE
+                   RANGOS + FACTORES BASE DEL MUNICIPIO
                 ==================================================== */
 
-                const rangeResponse =
-                    await getPredictionClimateRanges();
+                const [
+                    rangeResponse,
+                    municipalityFactorsResponse,
+                ] =
+                    await Promise.all([
+
+                        getPredictionClimateRanges(),
+
+                        getPredictionMunicipalityFactors(
+                            selectedMunicipality!.name
+                        ),
+
+                    ]);
 
 
-                const baseClimate =
-                    createMeanClimateInput(
-                        rangeResponse
-                    );
+                /*
+                 * Escenario base REAL del municipio.
+                 *
+                 * Ya no usamos createMeanClimateInput().
+                 */
 
+                const baseClimate:
+                    PredictionClimateInput = {
+
+                    precip_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .precip_mean,
+
+                    temp_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_mean,
+
+                    temp_max_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_max_mean,
+
+                    temp_min_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_min_mean,
+
+                    rh_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .rh_mean,
+
+                    dengue_lag1:
+                        Math.round(
+                            municipalityFactorsResponse
+                                .factors
+                                .dengue_lag1
+                        ),
+
+                };
+
+
+                /*
+                 * Valor base de la variable
+                 * que estamos analizando.
+                 */
+
+                const currentBaseValue =
+                    baseClimate[
+                        selectedVariable.key
+                    ];
+
+
+                /*
+                 * Los valores de sensibilidad se generan
+                 * alrededor del valor base del municipio.
+                 */
 
                 const sensitivityValues =
                     createSensitivityValues(
                         rangeResponse,
-                        selectedVariable
+                        selectedVariable,
+                        currentBaseValue
                     );
 
 
@@ -488,7 +603,9 @@ export default function PredictionVariableSensitivity({
                    PREDICCIONES DE SENSIBILIDAD
 
                    Modificamos una sola variable.
-                   Las demás permanecen en el escenario base.
+
+                   Las demás permanecen con los valores base
+                   propios del municipio.
                 ==================================================== */
 
                 const responses =
@@ -499,7 +616,8 @@ export default function PredictionVariableSensitivity({
                                 variableValue
                             ) => {
 
-                                const climate: PredictionClimateInput = {
+                                const climate:
+                                    PredictionClimateInput = {
 
                                     ...baseClimate,
 
@@ -575,6 +693,11 @@ export default function PredictionVariableSensitivity({
                 );
 
 
+                setBaseVariableValue(
+                    currentBaseValue
+                );
+
+
                 setBaseCases(
                     baseForecast
                         ?.predicted_cases ??
@@ -609,6 +732,13 @@ export default function PredictionVariableSensitivity({
                         ? loadError.message
                         : "No fue posible calcular la sensibilidad."
                 );
+
+
+                setPoints([]);
+
+                setBaseCases(null);
+
+                setBaseVariableValue(null);
 
             } finally {
 
@@ -672,7 +802,15 @@ export default function PredictionVariableSensitivity({
             : null;
 
 
-    const meanValue =
+    /*
+     * Conservamos esta referencia por si se necesita
+     * mostrar información estadística posteriormente.
+     *
+     * Actualmente la línea vertical del gráfico
+     * utilizará baseVariableValue.
+     */
+
+    const statisticalMean =
         ranges
             ? ranges.ranges[
                 selectedVariable.key
@@ -921,9 +1059,6 @@ export default function PredictionVariableSensitivity({
 
                         {/* ================================================
                             GRÁFICO
-
-                            flex-1 hace que utilice el espacio
-                            restante dentro de los 420 px.
                         ================================================ */}
 
                         <div
@@ -1097,15 +1232,15 @@ export default function PredictionVariableSensitivity({
 
 
                                     {/* ====================================
-                                        VALOR MEDIO
+                                        VALOR BASE DEL MUNICIPIO
                                     ==================================== */}
 
-                                    {meanValue !== null && (
+                                    {baseVariableValue !== null && (
 
                                         <ReferenceLine
                                             x={
                                                 formatNumber(
-                                                    meanValue,
+                                                    baseVariableValue,
                                                     selectedVariable.decimals
                                                 )
                                             }
@@ -1202,7 +1337,7 @@ export default function PredictionVariableSensitivity({
                             </div>
 
 
-                            {/* VALOR MEDIO */}
+                            {/* VALOR BASE */}
 
                             <div
                                 className="
@@ -1221,7 +1356,7 @@ export default function PredictionVariableSensitivity({
                                         text-slate-400
                                     "
                                 >
-                                    Valor medio
+                                    Valor base
                                 </p>
 
 
@@ -1233,9 +1368,9 @@ export default function PredictionVariableSensitivity({
                                         text-slate-700
                                     "
                                 >
-                                    {meanValue !== null
+                                    {baseVariableValue !== null
                                         ? `${formatNumber(
-                                            meanValue,
+                                            baseVariableValue,
                                             selectedVariable.decimals
                                         )} ${selectedVariable.unit}`
                                         : "Sin dato"}

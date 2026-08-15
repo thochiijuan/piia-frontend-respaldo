@@ -29,9 +29,9 @@ import type {
 } from "../data/predictionApi";
 
 import {
-    createMeanClimateInput,
     getForecastByHorizon,
     getPredictionClimateRanges,
+    getPredictionMunicipalityFactors,
     predictMunicipality,
 } from "../services/predictionApi.service";
 
@@ -245,7 +245,13 @@ export default function PredictionScenarioSimulator({
 
 
     /* ============================================================
-       CARGA DE RANGOS
+       CARGA DE RANGOS + FACTORES REALES DEL MUNICIPIO
+
+       /climate-ranges
+       → únicamente límites estadísticos de sliders.
+
+       /municipality-factors/{municipality}
+       → valores iniciales reales del municipio.
     ============================================================ */
 
     useEffect(() => {
@@ -253,7 +259,28 @@ export default function PredictionScenarioSimulator({
         let cancelled = false;
 
 
-        async function loadRanges() {
+        async function loadScenario() {
+
+            if (!selectedMunicipality) {
+
+                setRanges(null);
+
+                setValues(null);
+
+                setBaseValues(null);
+
+                setSimulation(null);
+
+                setLoading(false);
+
+                onSimulationChange(
+                    null
+                );
+
+                return;
+
+            }
+
 
             try {
 
@@ -262,14 +289,19 @@ export default function PredictionScenarioSimulator({
                 setError(null);
 
 
-                const response =
-                    await getPredictionClimateRanges();
+                const [
+                    rangesResponse,
+                    municipalityFactorsResponse,
+                ] =
+                    await Promise.all([
 
+                        getPredictionClimateRanges(),
 
-                const meanScenario =
-                    createMeanClimateInput(
-                        response
-                    );
+                        getPredictionMunicipalityFactors(
+                            selectedMunicipality.name
+                        ),
+
+                    ]);
 
 
                 if (cancelled) {
@@ -277,19 +309,57 @@ export default function PredictionScenarioSimulator({
                 }
 
 
+                const municipalityBase:
+                    PredictionClimateInput = {
+
+                    precip_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .precip_mean,
+
+                    temp_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_mean,
+
+                    temp_max_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_max_mean,
+
+                    temp_min_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_min_mean,
+
+                    rh_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .rh_mean,
+
+                    dengue_lag1:
+                        Math.round(
+                            municipalityFactorsResponse
+                                .factors
+                                .dengue_lag1
+                        ),
+
+                };
+
+
                 setRanges(
-                    response
+                    rangesResponse
                 );
 
 
-                setValues(
-                    meanScenario
-                );
+                setValues({
+                    ...municipalityBase,
+                });
 
 
-                setBaseValues(
-                    meanScenario
-                );
+                setBaseValues({
+                    ...municipalityBase,
+                });
 
 
                 setSimulation(
@@ -304,7 +374,7 @@ export default function PredictionScenarioSimulator({
             } catch (loadError) {
 
                 console.error(
-                    "Error cargando rangos del simulador:",
+                    "Error cargando escenario del simulador:",
                     loadError
                 );
 
@@ -320,6 +390,26 @@ export default function PredictionScenarioSimulator({
                         : "No fue posible cargar el simulador."
                 );
 
+
+                setValues(
+                    null
+                );
+
+
+                setBaseValues(
+                    null
+                );
+
+
+                setSimulation(
+                    null
+                );
+
+
+                onSimulationChange(
+                    null
+                );
+
             } finally {
 
                 if (!cancelled) {
@@ -333,7 +423,7 @@ export default function PredictionScenarioSimulator({
         }
 
 
-        void loadRanges();
+        void loadScenario();
 
 
         return () => {
@@ -343,27 +433,7 @@ export default function PredictionScenarioSimulator({
         };
 
     }, [
-        onSimulationChange,
-    ]);
-
-
-    /* ============================================================
-       CAMBIO DE MUNICIPIO
-    ============================================================ */
-
-    useEffect(() => {
-
-        setSimulation(
-            null
-        );
-
-
-        onSimulationChange(
-            null
-        );
-
-    }, [
-        selectedMunicipalityCode,
+        selectedMunicipality,
         onSimulationChange,
     ]);
 

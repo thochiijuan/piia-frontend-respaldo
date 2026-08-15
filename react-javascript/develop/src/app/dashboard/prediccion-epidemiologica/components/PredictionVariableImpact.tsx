@@ -28,9 +28,9 @@ import type {
 } from "../data/predictionApi";
 
 import {
-    createMeanClimateInput,
     getForecastByHorizon,
     getPredictionClimateRanges,
+    getPredictionMunicipalityFactors,
     predictMunicipality,
 } from "../services/predictionApi.service";
 
@@ -290,17 +290,66 @@ export default function PredictionVariableImpact({
 
 
                 /* ====================================================
-                   ESCENARIO BASE
+                   ESCENARIO BASE REAL DEL MUNICIPIO
+
+                   /municipality-factors/{municipality}
+                   → valores base propios del municipio.
+
+                   /climate-ranges
+                   → min / max / std para construir la prueba controlada.
                 ==================================================== */
 
-                const rangesResponse =
-                    await getPredictionClimateRanges();
+                const [
+                    rangesResponse,
+                    municipalityFactorsResponse,
+                ] =
+                    await Promise.all([
+
+                        getPredictionClimateRanges(),
+
+                        getPredictionMunicipalityFactors(
+                            selectedMunicipality!.name
+                        ),
+
+                    ]);
 
 
-                const baseClimate =
-                    createMeanClimateInput(
-                        rangesResponse
-                    );
+                const baseClimate:
+                    PredictionClimateInput = {
+
+                    precip_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .precip_mean,
+
+                    temp_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_mean,
+
+                    temp_max_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_max_mean,
+
+                    temp_min_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .temp_min_mean,
+
+                    rh_mean:
+                        municipalityFactorsResponse
+                            .factors
+                            .rh_mean,
+
+                    dengue_lag1:
+                        Math.round(
+                            municipalityFactorsResponse
+                                .factors
+                                .dengue_lag1
+                        ),
+
+                };
 
 
                 const basePrediction =
@@ -335,10 +384,15 @@ export default function PredictionVariableImpact({
                    PRUEBA CONTROLADA
 
                    Para cada variable:
-                   media + 1 desviación estándar.
+
+                   valor base del municipio + 1 desviación estándar.
 
                    Solo se modifica una variable.
-                   Las demás permanecen en escenario base.
+                   Las demás permanecen en el escenario base
+                   propio del municipio.
+
+                   El valor evaluado siempre respeta min / max
+                   de /climate-ranges.
                 ==================================================== */
 
                 const impactResponses =
@@ -356,11 +410,20 @@ export default function PredictionVariableImpact({
                                         ];
 
 
+                                const currentBaseValue =
+                                    baseClimate[
+                                        variable.key
+                                    ];
+
+
                                 let evaluatedValue =
                                     Math.min(
                                         range.max,
-                                        range.mean +
-                                        range.std
+                                        Math.max(
+                                            range.min,
+                                            currentBaseValue +
+                                            range.std
+                                        )
                                     );
 
 
@@ -375,9 +438,12 @@ export default function PredictionVariableImpact({
 
                                     evaluatedValue =
                                         Math.max(
-                                            1,
-                                            Math.round(
-                                                evaluatedValue
+                                            range.min,
+                                            Math.min(
+                                                range.max,
+                                                Math.round(
+                                                    evaluatedValue
+                                                )
                                             )
                                         );
 
@@ -476,9 +542,7 @@ export default function PredictionVariableImpact({
                                         variable.iconClassName,
 
                                     baseValue:
-                                        baseClimate[
-                                            variable.key
-                                        ],
+                                        currentBaseValue,
 
                                     evaluatedValue,
 
@@ -763,9 +827,9 @@ export default function PredictionVariableImpact({
                         text-violet-700
                     "
                 >
-                    Cada variable se evalúa individualmente en
-                    media + 1 desviación estándar, manteniendo las
-                    demás entradas en el escenario base.
+                    Cada variable se evalúa individualmente desde su valor
+                    base municipal + 1 desviación estándar, manteniendo las
+                    demás entradas en el estado base del municipio.
                 </p>
 
 

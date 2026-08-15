@@ -97,6 +97,110 @@ export interface PredictionMunicipality {
 
 /**
  * ============================================================================
+ * FACTORES BASE DEL MUNICIPIO
+ * ----------------------------------------------------------------------------
+ * Respuesta de:
+ *
+ * GET /api/v1/municipality-factors/{municipality}
+ *
+ * Estos valores corresponden al último estado disponible
+ * utilizado por el modelo como semilla predictiva.
+ *
+ * IMPORTANTE:
+ *
+ * Estos valores son específicos de cada municipio.
+ *
+ * No deben confundirse con los valores "mean" de:
+ *
+ * GET /api/v1/climate-ranges
+ *
+ * ya que esos corresponden a estadísticas generales del modelo.
+ * ============================================================================
+ */
+export interface PredictionMunicipalityFactors {
+
+    /**
+     * Precipitación media del último estado disponible.
+     */
+    precip_mean: number;
+
+
+    /**
+     * Temperatura media.
+     */
+    temp_mean: number;
+
+
+    /**
+     * Temperatura máxima media.
+     */
+    temp_max_mean: number;
+
+
+    /**
+     * Temperatura mínima media.
+     */
+    temp_min_mean: number;
+
+
+    /**
+     * Humedad relativa media.
+     */
+    rh_mean: number;
+
+
+    /**
+     * Casos de Dengue de la semana anterior.
+     *
+     * Variable epidemiológica rezagada.
+     */
+    dengue_lag1: number;
+
+}
+
+
+/**
+ * ============================================================================
+ * RESPUESTA DE FACTORES BASE DEL MUNICIPIO
+ * ----------------------------------------------------------------------------
+ * GET /api/v1/municipality-factors/{municipality}
+ * ============================================================================
+ */
+export interface PredictionMunicipalityFactorsResponse {
+
+    /**
+     * Nombre del municipio.
+     */
+    municipality: string;
+
+
+    /**
+     * Código territorial del municipio.
+     */
+    municipality_code: string;
+
+
+    /**
+     * Fecha del último estado disponible utilizado
+     * como semilla predictiva.
+     *
+     * Formato:
+     *
+     * YYYY-MM-DD
+     */
+    date: string;
+
+
+    /**
+     * Factores específicos del municipio.
+     */
+    factors: PredictionMunicipalityFactors;
+
+}
+
+
+/**
+ * ============================================================================
  * RANGO DE VARIABLE
  * ----------------------------------------------------------------------------
  * Estructura devuelta por:

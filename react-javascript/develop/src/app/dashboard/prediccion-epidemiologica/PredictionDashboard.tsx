@@ -1,5 +1,8 @@
 "use client";
 
+import PredictionAlerts
+    from "./components/PredictionAlerts";
+
 import {
     useEffect,
     useState,
@@ -350,11 +353,10 @@ export default function PredictionDashboard() {
 
                     <PredictionPanel
                         title="Mapa de riesgo epidémico"
-                        subtitle={`Dengue · Huila · +${selectedHorizon} ${
-                            selectedHorizon === 1
+                        subtitle={`Dengue · Huila · +${selectedHorizon} ${selectedHorizon === 1
                                 ? "semana"
                                 : "semanas"
-                        }`}
+                            }`}
                         minHeight="min-h-[460px]"
                     />
 
@@ -398,7 +400,14 @@ export default function PredictionDashboard() {
                     "
                 >
 
-                    <PredictionScenarioFactors />
+                    <PredictionScenarioFactors
+                        municipalities={
+                            municipalities
+                        }
+                        selectedMunicipalityCode={
+                            selectedMunicipalityCode
+                        }
+                    />
 
                 </div>
 
@@ -575,10 +584,16 @@ export default function PredictionDashboard() {
                     "
                 >
 
-                    <PredictionPanel
-                        title="Alertas predictivas"
-                        subtitle="Basadas en el nivel de riesgo proyectado"
-                        minHeight="min-h-[360px]"
+                    <PredictionAlerts
+                        municipalities={
+                            municipalities
+                        }
+                        selectedMunicipalityCode={
+                            selectedMunicipalityCode
+                        }
+                        selectedHorizon={
+                            selectedHorizon
+                        }
                     />
 
                 </div>

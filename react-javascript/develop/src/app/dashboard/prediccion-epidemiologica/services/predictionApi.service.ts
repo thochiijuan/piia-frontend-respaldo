@@ -31,6 +31,9 @@
  * /api/v1/municipalities
  *
  * GET
+ * /api/v1/municipality-factors/{municipality}
+ *
+ * GET
  * /api/v1/climate-ranges
  *
  * GET
@@ -77,6 +80,7 @@ import type {
     PredictionHorizonMetric,
     PredictionMetricsResponse,
     PredictionMunicipality,
+    PredictionMunicipalityFactorsResponse,
     WeekForecast,
 } from "../data/predictionApi";
 
@@ -267,6 +271,73 @@ export async function getPredictionMunicipalities():
 
     return handleResponse<
         PredictionMunicipality[]
+    >(
+        response
+    );
+
+}
+
+
+/**
+ * ============================================================================
+ * GET MUNICIPALITY FACTORS
+ * ----------------------------------------------------------------------------
+ * Endpoint:
+ *
+ * GET /api/v1/municipality-factors/{municipality}
+ *
+ * Devuelve los valores base específicos del municipio utilizados
+ * como semilla predictiva por el modelo.
+ *
+ * IMPORTANTE:
+ *
+ * Estos valores NO son los promedios generales de /climate-ranges.
+ *
+ * Provienen del último estado disponible del municipio almacenado
+ * por el backend en:
+ *
+ * last_state_per_municipality.parquet
+ *
+ * Ejemplos:
+ *
+ * Neiva
+ * Garzón
+ * Acevedo
+ * Pitalito
+ *
+ * Cada municipio puede tener valores diferentes.
+ * ============================================================================
+ */
+export async function getPredictionMunicipalityFactors(
+    municipality: string
+): Promise<PredictionMunicipalityFactorsResponse> {
+
+    const encodedMunicipality =
+        encodeURIComponent(
+            municipality
+        );
+
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/api/v1/municipality-factors/${encodedMunicipality}`,
+            {
+                method:
+                    "GET",
+
+                headers: {
+                    Accept:
+                        "application/json",
+                },
+
+                cache:
+                    "no-store",
+            }
+        );
+
+
+    return handleResponse<
+        PredictionMunicipalityFactorsResponse
     >(
         response
     );
@@ -789,8 +860,8 @@ export function getLastObservedPoint(
 
     return (
         sortedPoints[
-        sortedPoints.length -
-        1
+            sortedPoints.length -
+            1
         ] ??
         null
     );
