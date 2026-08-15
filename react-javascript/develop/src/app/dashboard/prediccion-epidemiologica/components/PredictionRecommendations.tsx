@@ -11,10 +11,10 @@ import type {
 } from "react";
 
 import {
-    AlertCircle,
     AlertTriangle,
     CheckCircle2,
     Info,
+    Lightbulb,
     Loader2,
     ShieldAlert,
 } from "lucide-react";
@@ -37,7 +37,7 @@ import {
    PROPS
 ============================================================================ */
 
-interface PredictionAlertsProps {
+interface PredictionRecommendationsProps {
 
     municipalities:
         PredictionMunicipality[];
@@ -52,26 +52,25 @@ interface PredictionAlertsProps {
 
 
 /* ============================================================================
-   CONFIGURACIÓN VISUAL DEL NIVEL DE RIESGO
+   RECOMENDACIÓN
 ============================================================================ */
 
-interface RiskVisualConfig {
+interface RecommendationItem {
 
     title: string;
 
     description: string;
 
-    containerClassName: string;
+    icon: ReactNode;
 
     iconClassName: string;
 
-    badgeClassName: string;
-
-    icon:
-        ReactNode;
-
 }
 
+
+/* ============================================================================
+   NORMALIZAR NIVEL DE RIESGO
+============================================================================ */
 
 function normalizeRiskLevel(
     value: string
@@ -89,9 +88,17 @@ function normalizeRiskLevel(
 }
 
 
-function getRiskVisualConfig(
+/* ============================================================================
+   RECOMENDACIONES SEGÚN RIESGO
+
+   IMPORTANTE:
+   Estas recomendaciones utilizan exclusivamente el nivel de riesgo
+   entregado por el modelo predictivo.
+============================================================================ */
+
+function getRiskRecommendations(
     riskLevel: string
-): RiskVisualConfig {
+): RecommendationItem[] {
 
     const normalized =
         normalizeRiskLevel(
@@ -104,29 +111,57 @@ function getRiskVisualConfig(
         "critico"
     ) {
 
-        return {
+        return [
 
-            title:
-                "Alerta crítica",
+            {
+                title:
+                    "Priorizar seguimiento epidemiológico",
 
-            description:
-                "El modelo proyecta un nivel crítico de riesgo epidemiológico para el horizonte seleccionado.",
+                description:
+                    "Revisar de manera prioritaria la evolución de los casos proyectados y el comportamiento territorial del municipio.",
 
-            containerClassName:
-                "border-red-200 bg-red-50/70",
+                icon:
+                    <ShieldAlert
+                        size={15}
+                    />,
 
-            iconClassName:
-                "bg-red-100 text-red-700",
+                iconClassName:
+                    "bg-red-50 text-red-600",
+            },
 
-            badgeClassName:
-                "border-red-200 bg-red-100 text-red-700",
+            {
+                title:
+                    "Reforzar vigilancia territorial",
 
-            icon:
-                <ShieldAlert
-                    size={20}
-                />,
+                description:
+                    "Incrementar la atención sobre las zonas con mayor riesgo y revisar oportunamente los indicadores epidemiológicos disponibles.",
 
-        };
+                icon:
+                    <AlertTriangle
+                        size={15}
+                    />,
+
+                iconClassName:
+                    "bg-orange-50 text-orange-600",
+            },
+
+            {
+                title:
+                    "Mantener seguimiento continuo",
+
+                description:
+                    "Evaluar nuevamente la proyección ante cambios relevantes en los datos epidemiológicos disponibles.",
+
+                icon:
+                    <Lightbulb
+                        size={15}
+                    />,
+
+                iconClassName:
+                    "bg-violet-50 text-violet-600",
+            },
+
+        ];
 
     }
 
@@ -136,29 +171,57 @@ function getRiskVisualConfig(
         "alto"
     ) {
 
-        return {
+        return [
 
-            title:
-                "Riesgo elevado",
+            {
+                title:
+                    "Reforzar monitoreo",
 
-            description:
-                "El modelo proyecta un nivel alto de riesgo epidemiológico para el horizonte seleccionado.",
+                description:
+                    "Mantener seguimiento cercano a la evolución de los casos proyectados durante el horizonte seleccionado.",
 
-            containerClassName:
-                "border-orange-200 bg-orange-50/70",
+                icon:
+                    <AlertTriangle
+                        size={15}
+                    />,
 
-            iconClassName:
-                "bg-orange-100 text-orange-600",
+                iconClassName:
+                    "bg-orange-50 text-orange-600",
+            },
 
-            badgeClassName:
-                "border-orange-200 bg-orange-100 text-orange-700",
+            {
+                title:
+                    "Revisar comportamiento territorial",
 
-            icon:
-                <AlertTriangle
-                    size={20}
-                />,
+                description:
+                    "Analizar la evolución epidemiológica del municipio y contrastarla con los registros observados disponibles.",
 
-        };
+                icon:
+                    <Lightbulb
+                        size={15}
+                    />,
+
+                iconClassName:
+                    "bg-violet-50 text-violet-600",
+            },
+
+            {
+                title:
+                    "Actualizar seguimiento",
+
+                description:
+                    "Repetir la revisión predictiva cuando existan nuevos datos epidemiológicos o cambios relevantes en el periodo analizado.",
+
+                icon:
+                    <CheckCircle2
+                        size={15}
+                    />,
+
+                iconClassName:
+                    "bg-emerald-50 text-emerald-600",
+            },
+
+        ];
 
     }
 
@@ -168,56 +231,80 @@ function getRiskVisualConfig(
         "medio"
     ) {
 
-        return {
+        return [
 
-            title:
-                "Vigilancia preventiva",
+            {
+                title:
+                    "Mantener vigilancia preventiva",
 
-            description:
-                "El modelo proyecta un nivel medio de riesgo epidemiológico para el horizonte seleccionado.",
+                description:
+                    "Realizar seguimiento periódico de los casos proyectados y revisar posibles cambios en el nivel de riesgo.",
 
-            containerClassName:
-                "border-amber-200 bg-amber-50/70",
+                icon:
+                    <Lightbulb
+                        size={15}
+                    />,
 
-            iconClassName:
-                "bg-amber-100 text-amber-600",
+                iconClassName:
+                    "bg-amber-50 text-amber-600",
+            },
 
-            badgeClassName:
-                "border-amber-200 bg-amber-100 text-amber-700",
+            {
+                title:
+                    "Revisar tendencia epidemiológica",
 
-            icon:
-                <AlertCircle
-                    size={20}
-                />,
+                description:
+                    "Comparar la proyección con los últimos datos observados disponibles para el municipio.",
 
-        };
+                icon:
+                    <CheckCircle2
+                        size={15}
+                    />,
+
+                iconClassName:
+                    "bg-emerald-50 text-emerald-600",
+            },
+
+        ];
 
     }
 
 
-    return {
+    return [
 
-        title:
-            "Situación estable",
+        {
+            title:
+                "Mantener seguimiento rutinario",
 
-        description:
-            "El modelo proyecta un nivel bajo de riesgo epidemiológico para el horizonte seleccionado.",
+            description:
+                "Continuar con la vigilancia epidemiológica habitual y revisar periódicamente la evolución del municipio.",
 
-        containerClassName:
-            "border-emerald-200 bg-emerald-50/70",
+            icon:
+                <CheckCircle2
+                    size={15}
+                />,
 
-        iconClassName:
-            "bg-emerald-100 text-emerald-600",
+            iconClassName:
+                "bg-emerald-50 text-emerald-600",
+        },
 
-        badgeClassName:
-            "border-emerald-200 bg-emerald-100 text-emerald-700",
+        {
+            title:
+                "Observar cambios en la proyección",
 
-        icon:
-            <CheckCircle2
-                size={20}
-            />,
+            description:
+                "Consultar nuevamente el modelo cuando existan nuevos datos o cuando cambie el horizonte de análisis.",
 
-    };
+            icon:
+                <Lightbulb
+                    size={15}
+                />,
+
+            iconClassName:
+                "bg-violet-50 text-violet-600",
+        },
+
+    ];
 
 }
 
@@ -251,7 +338,7 @@ function formatNumber(
    COMPONENTE
 ============================================================================ */
 
-export default function PredictionAlerts({
+export default function PredictionRecommendations({
 
     municipalities,
 
@@ -259,7 +346,7 @@ export default function PredictionAlerts({
 
     selectedHorizon,
 
-}: PredictionAlertsProps) {
+}: PredictionRecommendationsProps) {
 
     const [
         forecast,
@@ -307,7 +394,7 @@ export default function PredictionAlerts({
 
 
     /* ============================================================
-       CARGA DE INFORMACIÓN EPIDEMIOLÓGICA
+       CARGA DE DATOS EPIDEMIOLÓGICOS
     ============================================================ */
 
     useEffect(() => {
@@ -316,7 +403,7 @@ export default function PredictionAlerts({
             false;
 
 
-        async function loadAlert() {
+        async function loadRecommendations() {
 
             if (
                 !selectedMunicipality
@@ -347,7 +434,7 @@ export default function PredictionAlerts({
 
 
                 /*
-                 * Obtenemos únicamente los factores base
+                 * Obtenemos los factores base
                  * propios del municipio.
                  */
 
@@ -357,9 +444,9 @@ export default function PredictionAlerts({
                     );
 
 
-                /*
-                 * Escenario base real del municipio.
-                 */
+                /* ====================================================
+                   ESCENARIO BASE DEL MODELO
+                ==================================================== */
 
                 const baseClimate:
                     PredictionClimateInput = {
@@ -400,8 +487,8 @@ export default function PredictionAlerts({
 
 
                 /*
-                 * La alerta se construye exclusivamente
-                 * con la predicción epidemiológica.
+                 * La recomendación se deriva únicamente
+                 * de la predicción epidemiológica.
                  */
 
                 const prediction =
@@ -440,7 +527,7 @@ export default function PredictionAlerts({
             ) {
 
                 console.error(
-                    "Error cargando alerta predictiva:",
+                    "Error cargando recomendaciones:",
                     loadError
                 );
 
@@ -455,7 +542,7 @@ export default function PredictionAlerts({
                 setError(
                     loadError instanceof Error
                         ? loadError.message
-                        : "No fue posible cargar la alerta predictiva."
+                        : "No fue posible cargar las recomendaciones."
                 );
 
 
@@ -481,7 +568,7 @@ export default function PredictionAlerts({
         }
 
 
-        void loadAlert();
+        void loadRecommendations();
 
 
         return () => {
@@ -545,7 +632,7 @@ export default function PredictionAlerts({
                             text-[9px]
                         "
                     >
-                        Evaluando alerta...
+                        Generando recomendaciones...
                     </span>
 
                 </div>
@@ -588,7 +675,7 @@ export default function PredictionAlerts({
                         text-slate-800
                     "
                 >
-                    Alertas predictivas
+                    Recomendaciones ante el riesgo
                 </h2>
 
 
@@ -600,7 +687,7 @@ export default function PredictionAlerts({
                     "
                 >
                     {error ??
-                        "No fue posible obtener la información."}
+                        "No fue posible obtener las recomendaciones."}
                 </p>
 
             </article>
@@ -611,11 +698,11 @@ export default function PredictionAlerts({
 
 
     /* ============================================================
-       CONFIGURACIÓN DE RIESGO
+       RECOMENDACIONES SEGÚN RIESGO
     ============================================================ */
 
-    const visual =
-        getRiskVisualConfig(
+    const recommendations =
+        getRiskRecommendations(
             forecast.risk_level
         );
 
@@ -672,7 +759,7 @@ export default function PredictionAlerts({
                                 text-slate-800
                             "
                         >
-                            Alertas predictivas
+                            Recomendaciones ante el riesgo
                         </h2>
 
 
@@ -693,7 +780,7 @@ export default function PredictionAlerts({
                             text-slate-500
                         "
                     >
-                        Basadas en el nivel de riesgo proyectado
+                        Apoyo para la toma de decisiones
                     </p>
 
                 </div>
@@ -720,126 +807,53 @@ export default function PredictionAlerts({
 
 
             {/* ========================================================
-                RIESGO EPIDEMIOLÓGICO
-            ======================================================== */}
-
-            <div
-                className={`
-                    mt-4
-                    rounded-xl
-                    border
-                    p-3
-                    ${visual.containerClassName}
-                `}
-            >
-
-                <div
-                    className="
-                        flex
-                        items-start
-                        gap-3
-                    "
-                >
-
-                    <div
-                        className={`
-                            flex
-                            h-10
-                            w-10
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-xl
-                            ${visual.iconClassName}
-                        `}
-                    >
-                        {visual.icon}
-                    </div>
-
-
-                    <div
-                        className="
-                            min-w-0
-                            flex-1
-                        "
-                    >
-
-                        <div
-                            className="
-                                flex
-                                items-center
-                                justify-between
-                                gap-2
-                            "
-                        >
-
-                            <p
-                                className="
-                                    text-[11px]
-                                    font-bold
-                                    text-slate-800
-                                "
-                            >
-                                {visual.title}
-                            </p>
-
-
-                            <span
-                                className={`
-                                    rounded-full
-                                    border
-                                    px-2
-                                    py-1
-                                    text-[8px]
-                                    font-bold
-                                    ${visual.badgeClassName}
-                                `}
-                            >
-                                {forecast.risk_level}
-                            </span>
-
-                        </div>
-
-
-                        <p
-                            className="
-                                mt-1.5
-                                text-[8px]
-                                leading-[12px]
-                                text-slate-600
-                            "
-                        >
-                            {visual.description}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {/* ========================================================
-                CASOS + INCIDENCIA
+                RESUMEN
             ======================================================== */}
 
             <div
                 className="
-                    mt-3
-                    grid
-                    grid-cols-2
-                    gap-2
+                    mt-4
+                    flex
+                    items-center
+                    justify-between
+                    rounded-xl
+                    border
+                    border-violet-100
+                    bg-violet-50/50
+                    px-3
+                    py-2.5
                 "
             >
 
+                <div>
+
+                    <p
+                        className="
+                            text-[8px]
+                            text-violet-500
+                        "
+                    >
+                        Riesgo proyectado
+                    </p>
+
+
+                    <p
+                        className="
+                            mt-0.5
+                            text-[12px]
+                            font-bold
+                            text-violet-700
+                        "
+                    >
+                        {forecast.risk_level}
+                    </p>
+
+                </div>
+
+
                 <div
                     className="
-                        rounded-lg
-                        border
-                        border-slate-200
-                        bg-slate-50/50
-                        px-3
-                        py-3
+                        text-right
                     "
                 >
 
@@ -855,10 +869,10 @@ export default function PredictionAlerts({
 
                     <p
                         className="
-                            mt-1
-                            text-[17px]
+                            mt-0.5
+                            text-[12px]
                             font-bold
-                            text-slate-800
+                            text-slate-700
                         "
                     >
                         {formatNumber(
@@ -869,53 +883,98 @@ export default function PredictionAlerts({
 
                 </div>
 
-
-                <div
-                    className="
-                        rounded-lg
-                        border
-                        border-slate-200
-                        bg-slate-50/50
-                        px-3
-                        py-3
-                    "
-                >
-
-                    <p
-                        className="
-                            text-[8px]
-                            text-slate-400
-                        "
-                    >
-                        Incidencia
-                    </p>
+            </div>
 
 
-                    <p
-                        className="
-                            mt-1
-                            text-[17px]
-                            font-bold
-                            text-slate-800
-                        "
-                    >
-                        {formatNumber(
-                            forecast.incidence,
-                            2
-                        )}
-                    </p>
+            {/* ========================================================
+                LISTA DE RECOMENDACIONES
+            ======================================================== */}
 
-                    <p
-                        className="
-                            mt-0.5
-                            text-[7px]
-                            text-slate-400
-                        "
-                    >
-                        por 100.000 habitantes
-                    </p>
+            <div
+                className="
+                    mt-3
+                    space-y-2
+                "
+            >
 
-                </div>
+                {recommendations.map(
+                    (
+                        recommendation
+                    ) => (
+
+                        <div
+                            key={
+                                recommendation.title
+                            }
+                            className="
+                                flex
+                                items-start
+                                gap-2.5
+                                rounded-xl
+                                border
+                                border-slate-200
+                                bg-slate-50/40
+                                px-3
+                                py-2.5
+                            "
+                        >
+
+                            <div
+                                className={`
+                                    flex
+                                    h-8
+                                    w-8
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    ${recommendation.iconClassName}
+                                `}
+                            >
+                                {
+                                    recommendation.icon
+                                }
+                            </div>
+
+
+                            <div
+                                className="
+                                    min-w-0
+                                "
+                            >
+
+                                <p
+                                    className="
+                                        text-[9px]
+                                        font-bold
+                                        text-slate-700
+                                    "
+                                >
+                                    {
+                                        recommendation.title
+                                    }
+                                </p>
+
+
+                                <p
+                                    className="
+                                        mt-1
+                                        text-[8px]
+                                        leading-[12px]
+                                        text-slate-500
+                                    "
+                                >
+                                    {
+                                        recommendation.description
+                                    }
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    )
+                )}
 
             </div>
 
@@ -945,7 +1004,7 @@ export default function PredictionAlerts({
                         text-slate-500
                     "
                 >
-                    Horizonte epidemiológico
+                    Horizonte analizado
                 </span>
 
 
@@ -966,37 +1025,6 @@ export default function PredictionAlerts({
 
 
             {/* ========================================================
-                INFORMACIÓN
-            ======================================================== */}
-
-            <div
-                className="
-                    mt-3
-                    rounded-lg
-                    border
-                    border-slate-200
-                    bg-slate-50/40
-                    px-3
-                    py-2.5
-                "
-            >
-
-                <p
-                    className="
-                        text-[8px]
-                        leading-[13px]
-                        text-slate-500
-                    "
-                >
-                    La alerta corresponde al nivel de riesgo entregado
-                    directamente por el modelo predictivo para el municipio
-                    y horizonte seleccionados.
-                </p>
-
-            </div>
-
-
-            {/* ========================================================
                 ACLARACIÓN
             ======================================================== */}
 
@@ -1009,8 +1037,9 @@ export default function PredictionAlerts({
                     text-slate-400
                 "
             >
-                Este componente presenta exclusivamente información
-                epidemiológica del modelo de Dengue.
+                Las recomendaciones se generan a partir del nivel de
+                riesgo epidemiológico proyectado por el modelo para el
+                municipio y horizonte seleccionados.
             </p>
 
         </article>

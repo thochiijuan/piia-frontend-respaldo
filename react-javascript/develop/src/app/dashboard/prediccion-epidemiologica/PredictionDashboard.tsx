@@ -1,5 +1,11 @@
 "use client";
 
+import PredictionScenarios
+    from "./components/PredictionScenarios";
+
+import PredictionRecommendations
+    from "./components/PredictionRecommendations";
+
 import PredictionAlerts
     from "./components/PredictionAlerts";
 
@@ -354,8 +360,8 @@ export default function PredictionDashboard() {
                     <PredictionPanel
                         title="Mapa de riesgo epidémico"
                         subtitle={`Dengue · Huila · +${selectedHorizon} ${selectedHorizon === 1
-                                ? "semana"
-                                : "semanas"
+                            ? "semana"
+                            : "semanas"
                             }`}
                         minHeight="min-h-[460px]"
                     />
@@ -610,10 +616,16 @@ export default function PredictionDashboard() {
                     "
                 >
 
-                    <PredictionPanel
-                        title="Recomendaciones ante el riesgo"
-                        subtitle="Apoyo para la toma de decisiones"
-                        minHeight="min-h-[360px]"
+                    <PredictionRecommendations
+                        municipalities={
+                            municipalities
+                        }
+                        selectedMunicipalityCode={
+                            selectedMunicipalityCode
+                        }
+                        selectedHorizon={
+                            selectedHorizon
+                        }
                     />
 
                 </div>
@@ -630,10 +642,13 @@ export default function PredictionDashboard() {
                     "
                 >
 
-                    <PredictionPanel
-                        title="Escenarios de riesgo"
-                        subtitle="Proyección de 1 a 4 semanas"
-                        minHeight="min-h-[360px]"
+                    <PredictionScenarios
+                        municipalities={
+                            municipalities
+                        }
+                        selectedMunicipalityCode={
+                            selectedMunicipalityCode
+                        }
                     />
 
                 </div>
